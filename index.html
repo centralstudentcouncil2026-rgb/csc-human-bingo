@@ -2392,7 +2392,7 @@
     let currentIndex = null;
     let stream = null;
     let cameraPermissionAsked = false;
-    let currentFacingMode = "user";
+    let currentFacingMode = "environment";
     let streamFacingMode = null;
     let capturedBlob = null;
     let capturedDataUrl = null;
@@ -2643,12 +2643,12 @@
       }
     }
 
-    async function startCamera() {
+    async function startCamera({ fromSwitch = false, fallbackFacingMode = null } = {}) {
       if (!navigator.mediaDevices?.getUserMedia) {
         showCameraMessage("Your browser cannot open the live camera preview. Please open this page on a phone browser with camera permission enabled.");
         captureBtn.disabled = true;
         switchCameraBtn.disabled = true;
-        return;
+        return false;
       }
 
       try {
@@ -2658,51 +2658,181 @@
         const hasLiveCamera = stream?.getVideoTracks?.().some(track => track.readyState === "live") && streamFacingMode === currentFacingMode;
         if (!hasLiveCamera) {
           stopCamera();
-          cameraPermissionAsked = true;
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { ideal: currentFacingMode },
-              width: { ideal: 1280 },
-              height: { ideal: 1280 },
-              aspectRatio: { ideal: 1 }
-            },
-            audio: false
-          });
-          streamFacingMode = currentFacingMode;
+
+          /*
+           * Android Chrome can briefly keep the previous camera locked after
+           * switching. This short wait gives the browser time to fully release
+           * the back/front camera before requesting the other one.
+           */
+          if (fromSwitch) await wait(350);
+
+          const result = await openCameraStream(currentFacingMode);
+          stream = result.stream;
+          streamFacingMode = result.facingMode;
         }
 
         applyCameraMirror();
         cameraVideo.srcObject = stream;
         await cameraVideo.play();
+        cameraMessage.classList.add("hidden");
+        cameraVideo.style.display = "block";
+        return true;
       } catch (error) {
         console.error(error);
+
+        /*
+         * If switching fails, do not leave the user stuck on a permission error.
+         * Try to restore the previous working camera instead.
+         */
+        if (fromSwitch && fallbackFacingMode) {
+          const failedFacingMode = currentFacingMode;
+          currentFacingMode = fallbackFacingMode;
+
+          try {
+            await wait(350);
+            const result = await openCameraStream(currentFacingMode);
+            stream = result.stream;
+            streamFacingMode = result.facingMode;
+            applyCameraMirror();
+            cameraVideo.srcObject = stream;
+            await cameraVideo.play();
+            cameraMessage.classList.add("hidden");
+            cameraVideo.style.display = "block";
+            showToast(`${failedFacingMode === "user" ? "Front" : "Back"} camera could not open. Restored the previous camera.`);
+            captureBtn.disabled = false;
+            switchCameraBtn.disabled = false;
+            return true;
+          } catch (restoreError) {
+            console.error(restoreError);
+          }
+        }
+
         captureBtn.disabled = true;
         switchCameraBtn.disabled = false;
-        const message = cameraPermissionAsked
-          ? "Camera permission was blocked or unavailable. Please allow camera access in your browser settings and reopen this square."
-          : "Camera permission is required before taking photos.";
-        showCameraMessage(message);
+        showCameraMessage("Could not open that camera. Please close other apps using the camera, allow camera permission, then try Switch Camera again.");
+        return false;
       }
     }
 
+    async function openCameraStream(facingMode) {
+      const preferredDeviceId = await findCameraDeviceId(facingMode);
+      const attempts = [];
+
+      if (preferredDeviceId) {
+        attempts.push({
+          constraints: {
+            video: {
+              deviceId: { exact: preferredDeviceId },
+              width: { ideal: 1280 },
+              height: { ideal: 1280 },
+              aspectRatio: { ideal: 1 }
+            },
+            audio: false
+          },
+          facingMode
+        });
+      }
+
+      attempts.push(
+        {
+          constraints: {
+            video: {
+              facingMode: { exact: facingMode },
+              width: { ideal: 1280 },
+              height: { ideal: 1280 },
+              aspectRatio: { ideal: 1 }
+            },
+            audio: false
+          },
+          facingMode
+        },
+        {
+          constraints: {
+            video: {
+              facingMode: { ideal: facingMode },
+              width: { ideal: 1280 },
+              height: { ideal: 1280 },
+              aspectRatio: { ideal: 1 }
+            },
+            audio: false
+          },
+          facingMode
+        },
+        {
+          constraints: {
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 1280 },
+              aspectRatio: { ideal: 1 }
+            },
+            audio: false
+          },
+          facingMode
+        }
+      );
+
+      let lastError = null;
+      for (const attempt of attempts) {
+        try {
+          const nextStream = await navigator.mediaDevices.getUserMedia(attempt.constraints);
+          return { stream: nextStream, facingMode: attempt.facingMode };
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error("Camera unavailable");
+    }
+
+    async function findCameraDeviceId(facingMode) {
+      if (!navigator.mediaDevices?.enumerateDevices) return null;
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cameras = devices.filter(device => device.kind === "videoinput");
+        if (!cameras.length) return null;
+
+        const matcher = facingMode === "user"
+          ? /(front|user|face|selfie)/i
+          : /(back|rear|environment|world)/i;
+
+        return cameras.find(camera => matcher.test(camera.label))?.deviceId || null;
+      } catch (error) {
+        console.warn("Could not enumerate cameras", error);
+        return null;
+      }
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     function applyCameraMirror() {
-      cameraVideo.classList.toggle("mirrored", currentFacingMode === "user");
+      cameraVideo.classList.toggle("mirrored", streamFacingMode === "user");
     }
 
     async function switchCamera() {
-      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+      const previousFacingMode = streamFacingMode || currentFacingMode;
+      currentFacingMode = previousFacingMode === "user" ? "environment" : "user";
+
       capturedBlob = null;
       capturedDataUrl = null;
       savePhotoBtn.disabled = true;
       retakeBtn.classList.add("hidden");
       captureBtn.classList.remove("hidden");
+      captureBtn.disabled = true;
       switchCameraBtn.disabled = true;
       photoPreview.style.display = "none";
       photoPreview.removeAttribute("src");
       cameraVideo.style.display = "block";
-      cameraMessage.classList.add("hidden");
-      stopCamera();
-      await startCamera();
+      showCameraMessage(`Switching to ${currentFacingMode === "user" ? "front" : "back"} camera...`);
+
+      const opened = await startCamera({
+        fromSwitch: true,
+        fallbackFacingMode: previousFacingMode
+      });
+
+      captureBtn.disabled = !opened;
       switchCameraBtn.disabled = false;
     }
 
@@ -2751,7 +2881,7 @@
       captureCanvas.height = outputSize;
 
       const ctx = captureCanvas.getContext("2d");
-      if (currentFacingMode === "user") {
+      if (streamFacingMode === "user") {
         ctx.save();
         ctx.translate(outputSize, 0);
         ctx.scale(-1, 1);
