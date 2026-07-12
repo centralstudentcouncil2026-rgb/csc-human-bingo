@@ -2175,6 +2175,33 @@
       }
     }
 
+  
+
+    /* Completed-card bottom button */
+    .completed-card-btn {
+      width: 100%;
+      min-height: 46px;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #1f7af0 0%, #082f71 100%);
+      color: #ffffff;
+      font-weight: 850;
+      letter-spacing: 0.01em;
+      box-shadow: 0 10px 24px rgba(8, 32, 74, 0.14);
+    }
+
+    .bottom-progress:has(.completed-card-btn:not(.hidden)) {
+      padding-bottom: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .completed-card-btn {
+        min-height: 48px;
+        margin-top: 9px;
+        font-size: 0.95rem;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2205,6 +2232,7 @@
       <span id="progressText">0/12</span>
     </div>
     <div class="bar" aria-hidden="true"><div id="progressBar"></div></div>
+    <button class="completed-card-btn hidden" id="openCompletedCardBtn" type="button">View Completed Card</button>
   </aside>
 
   <dialog id="cameraDialog">
@@ -2407,6 +2435,7 @@
     const visitorIdText = document.getElementById("visitorIdText");
     const progressText = document.getElementById("progressText");
     const progressBar = document.getElementById("progressBar");
+    const openCompletedCardBtn = document.getElementById("openCompletedCardBtn");
     const toast = document.getElementById("toast");
 
     const cameraDialog = document.getElementById("cameraDialog");
@@ -2466,6 +2495,9 @@
     cancelResetTopBtn.addEventListener("click", closeResetConfirm);
     cancelResetBtn.addEventListener("click", closeResetConfirm);
     confirmResetBtn.addEventListener("click", resetCard);
+    openCompletedCardBtn.addEventListener("click", async () => {
+      if (completedCount() === TOTAL_SQUARES) await openCongrats(false);
+    });
     closeSaveConfirmTopBtn.addEventListener("click", () => saveConfirmDialog.close());
     closeSaveConfirmBtn.addEventListener("click", () => saveConfirmDialog.close());
 
@@ -2603,6 +2635,7 @@
       const percent = (count / TOTAL_SQUARES) * 100;
       progressText.textContent = `${count}/${TOTAL_SQUARES}`;
       progressBar.style.width = `${percent}%`;
+      openCompletedCardBtn.classList.toggle("hidden", count !== TOTAL_SQUARES);
     }
 
     function completedCount() {
