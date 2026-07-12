@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2095,7 +2096,86 @@
       .collage-popup-title { font-size: clamp(2.5rem, 10.8vw, 3.2rem); }
       .collage-popup-subtitle { font-size: clamp(1.65rem, 7.8vw, 2.15rem) !important; }
     }
-</style>
+
+
+    /* Requested update: camera mirroring, save confirmation popup, and mobile title fit */
+    #cameraVideo.mirrored {
+      transform: scaleX(-1);
+    }
+
+    .save-confirm-body {
+      padding: 24px 20px 22px;
+      text-align: center;
+    }
+
+    .save-confirm-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      color: #08204a;
+      background: linear-gradient(135deg, #fde047, #fef9c3);
+      font-size: 1.8rem;
+      box-shadow: 0 12px 28px rgba(250, 204, 21, 0.20);
+    }
+
+    .save-confirm-body h3 {
+      margin: 0 0 8px;
+      color: #08204a;
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+    }
+
+    .save-confirm-body p {
+      margin: 0 auto 16px;
+      max-width: 420px;
+      color: #55708f;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .save-confirm-body button {
+      min-width: 160px;
+    }
+
+    .party-banner {
+      grid-template-columns: clamp(34px, 8vw, 82px) minmax(0, 1fr) clamp(34px, 8vw, 82px) !important;
+      padding-inline: clamp(8px, 2.8vw, 24px) !important;
+    }
+
+    .party-banner h1 {
+      width: 100%;
+      min-width: 0;
+      text-align: center;
+      font-size: clamp(2rem, 6.3vw, 2.9rem) !important;
+      letter-spacing: -0.005em !important;
+      white-space: nowrap;
+      transform: none !important;
+    }
+
+    @media (max-width: 430px) {
+      .party-banner h1 {
+        font-size: clamp(1.22rem, 5.9vw, 1.62rem) !important;
+        letter-spacing: -0.02em !important;
+      }
+      .party-banner {
+        grid-template-columns: 30px minmax(0, 1fr) 30px !important;
+        padding-inline: 8px !important;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .party-banner h1 {
+        font-size: clamp(1.05rem, 5.5vw, 1.34rem) !important;
+      }
+      .heart {
+        font-size: 1.7rem !important;
+      }
+    }
+
+  </style>
 </head>
 <body>
   <main class="app">
@@ -2145,6 +2225,7 @@
         <div class="left-actions">
           <button class="secondary" id="captureBtn" type="button">📸 Capture</button>
           <button class="ghost hidden" id="retakeBtn" type="button">Retake</button>
+          <button class="ghost" id="switchCameraBtn" type="button">🔄 Switch Camera</button>
         </div>
         <div class="right-actions">
           <button id="savePhotoBtn" type="button" disabled>Save to Square</button>
@@ -2216,6 +2297,19 @@
         <button class="ghost" id="cancelResetBtn" type="button">Cancel</button>
         <button class="danger" id="confirmResetBtn" type="button">Yes, Reset All</button>
       </div>
+    </div>
+  </dialog>
+
+  <dialog id="saveConfirmDialog">
+    <div class="modal-head">
+      <h2>Saved</h2>
+      <button class="ghost" id="closeSaveConfirmTopBtn" type="button">Close</button>
+    </div>
+    <div class="save-confirm-body">
+      <div class="save-confirm-icon" aria-hidden="true">✓</div>
+      <h3>Saved Successfully</h3>
+      <p id="saveConfirmMessage">Your file was saved locally on your device.</p>
+      <button id="closeSaveConfirmBtn" type="button">Okay</button>
     </div>
   </dialog>
 
@@ -2298,6 +2392,8 @@
     let currentIndex = null;
     let stream = null;
     let cameraPermissionAsked = false;
+    let currentFacingMode = "user";
+    let streamFacingMode = null;
     let capturedBlob = null;
     let capturedDataUrl = null;
     let latestCollageBlob = null;
@@ -2323,6 +2419,7 @@
     const captureBtn = document.getElementById("captureBtn");
     const savePhotoBtn = document.getElementById("savePhotoBtn");
     const retakeBtn = document.getElementById("retakeBtn");
+    const switchCameraBtn = document.getElementById("switchCameraBtn");
 
     const congratsDialog = document.getElementById("congratsDialog");
     const collagePreview = document.getElementById("collagePreview");
@@ -2343,6 +2440,10 @@
     const cancelResetTopBtn = document.getElementById("cancelResetTopBtn");
     const cancelResetBtn = document.getElementById("cancelResetBtn");
     const confirmResetBtn = document.getElementById("confirmResetBtn");
+    const saveConfirmDialog = document.getElementById("saveConfirmDialog");
+    const saveConfirmMessage = document.getElementById("saveConfirmMessage");
+    const closeSaveConfirmTopBtn = document.getElementById("closeSaveConfirmTopBtn");
+    const closeSaveConfirmBtn = document.getElementById("closeSaveConfirmBtn");
 
     document.addEventListener("DOMContentLoaded", init);
 
@@ -2351,6 +2452,7 @@
     document.getElementById("captureBtn").addEventListener("click", capturePhoto);
     document.getElementById("retakeBtn").addEventListener("click", retakePhoto);
     document.getElementById("savePhotoBtn").addEventListener("click", saveCapturedPhoto);
+    switchCameraBtn.addEventListener("click", switchCamera);
 
     document.getElementById("closeCongratsBtn").addEventListener("click", () => congratsDialog.close());
     saveCollageBtn.addEventListener("click", saveCollageToDevice);
@@ -2364,6 +2466,8 @@
     cancelResetTopBtn.addEventListener("click", closeResetConfirm);
     cancelResetBtn.addEventListener("click", closeResetConfirm);
     confirmResetBtn.addEventListener("click", resetCard);
+    closeSaveConfirmTopBtn.addEventListener("click", () => saveConfirmDialog.close());
+    closeSaveConfirmBtn.addEventListener("click", () => saveConfirmDialog.close());
 
     window.addEventListener("beforeunload", stopCamera);
     window.addEventListener("pagehide", stopCamera);
@@ -2517,6 +2621,7 @@
       retakeBtn.classList.toggle("hidden", !hasExistingPhoto);
       retakeBtn.textContent = hasExistingPhoto ? "Retake / Replace" : "Retake";
       captureBtn.classList.toggle("hidden", hasExistingPhoto);
+      switchCameraBtn.classList.toggle("hidden", hasExistingPhoto);
 
       photoPreview.style.display = hasExistingPhoto ? "block" : "none";
       if (hasExistingPhoto) {
@@ -2542,36 +2647,63 @@
       if (!navigator.mediaDevices?.getUserMedia) {
         showCameraMessage("Your browser cannot open the live camera preview. Please open this page on a phone browser with camera permission enabled.");
         captureBtn.disabled = true;
+        switchCameraBtn.disabled = true;
         return;
       }
 
       try {
         captureBtn.disabled = false;
+        switchCameraBtn.disabled = false;
 
-        const hasLiveCamera = stream?.getVideoTracks?.().some(track => track.readyState === "live");
+        const hasLiveCamera = stream?.getVideoTracks?.().some(track => track.readyState === "live") && streamFacingMode === currentFacingMode;
         if (!hasLiveCamera) {
+          stopCamera();
           cameraPermissionAsked = true;
           stream = await navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode: { ideal: "environment" },
+              facingMode: { ideal: currentFacingMode },
               width: { ideal: 1280 },
               height: { ideal: 1280 },
               aspectRatio: { ideal: 1 }
             },
             audio: false
           });
+          streamFacingMode = currentFacingMode;
         }
 
+        applyCameraMirror();
         cameraVideo.srcObject = stream;
         await cameraVideo.play();
       } catch (error) {
         console.error(error);
         captureBtn.disabled = true;
+        switchCameraBtn.disabled = false;
         const message = cameraPermissionAsked
           ? "Camera permission was blocked or unavailable. Please allow camera access in your browser settings and reopen this square."
           : "Camera permission is required before taking photos.";
         showCameraMessage(message);
       }
+    }
+
+    function applyCameraMirror() {
+      cameraVideo.classList.toggle("mirrored", currentFacingMode === "user");
+    }
+
+    async function switchCamera() {
+      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+      capturedBlob = null;
+      capturedDataUrl = null;
+      savePhotoBtn.disabled = true;
+      retakeBtn.classList.add("hidden");
+      captureBtn.classList.remove("hidden");
+      switchCameraBtn.disabled = true;
+      photoPreview.style.display = "none";
+      photoPreview.removeAttribute("src");
+      cameraVideo.style.display = "block";
+      cameraMessage.classList.add("hidden");
+      stopCamera();
+      await startCamera();
+      switchCameraBtn.disabled = false;
     }
 
     function pauseCameraPreview() {
@@ -2583,6 +2715,7 @@
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
         stream = null;
+        streamFacingMode = null;
       }
       cameraVideo.srcObject = null;
     }
@@ -2618,17 +2751,35 @@
       captureCanvas.height = outputSize;
 
       const ctx = captureCanvas.getContext("2d");
-      ctx.drawImage(
-        cameraVideo,
-        sourceX,
-        sourceY,
-        sourceSide,
-        sourceSide,
-        0,
-        0,
-        outputSize,
-        outputSize
-      );
+      if (currentFacingMode === "user") {
+        ctx.save();
+        ctx.translate(outputSize, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(
+          cameraVideo,
+          sourceX,
+          sourceY,
+          sourceSide,
+          sourceSide,
+          0,
+          0,
+          outputSize,
+          outputSize
+        );
+        ctx.restore();
+      } else {
+        ctx.drawImage(
+          cameraVideo,
+          sourceX,
+          sourceY,
+          sourceSide,
+          sourceSide,
+          0,
+          0,
+          outputSize,
+          outputSize
+        );
+      }
 
       capturedBlob = await canvasToBlob(captureCanvas, "image/jpeg", 0.88);
       capturedDataUrl = captureCanvas.toDataURL("image/jpeg", 0.88);
@@ -2650,6 +2801,7 @@
       retakeBtn.classList.add("hidden");
       retakeBtn.textContent = "Retake";
       captureBtn.classList.remove("hidden");
+      switchCameraBtn.classList.remove("hidden");
       photoPreview.style.display = "none";
       photoPreview.removeAttribute("src");
       cameraVideo.style.display = "block";
@@ -2705,7 +2857,7 @@
 
     async function previewWholeCollage() {
       if (!latestCollageBlob) latestCollageBlob = await generateCollageBlob();
-      const fileName = `human-bingo-card-collage-${shortId(visitorId).replaceAll("…", "")}.png`;
+      const fileName = "CSCHumanBingoAkwe2026.png";
       openFullPreview(URL.createObjectURL(latestCollageBlob), latestCollageBlob, fileName, {
         title: "Whole Collage Preview",
         text: "My completed Human Bingo Card Collage."
@@ -2778,6 +2930,7 @@
       try {
         await saveBlobToDevice(currentPreviewBlob, currentPreviewFileName, currentPreviewShareMeta);
         showToast("Saved to your device.");
+        showLocalSaveConfirmation("Photo saved locally on your device.");
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error(error);
@@ -2813,6 +2966,7 @@
         });
 
         showToast(`Square ${index + 1} photo saved to your device.`);
+        showLocalSaveConfirmation(`Square ${index + 1} photo saved locally on your device.`);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error(error);
@@ -3068,7 +3222,7 @@
       saveCollageBtn.innerHTML = `<span class="spinner"></span> Saving...`;
 
       try {
-        const fileName = `human-bingo-card-collage-${shortId(visitorId).replaceAll("…", "")}.png`;
+        const fileName = "CSCHumanBingoAkwe2026.png";
         await saveBlobToDevice(latestCollageBlob, fileName, {
           title: "Human Bingo Card Collage",
           text: "My completed Human Bingo Card Collage."
@@ -3076,6 +3230,7 @@
 
         postSaveActions.classList.add("show");
         showToast("Collage saved to your device.");
+        showLocalSaveConfirmation("Bingo card saved locally as CSCHumanBingoAkwe2026.png.");
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error(error);
@@ -3091,7 +3246,7 @@
       const url = URL.createObjectURL(latestCollageBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `csc-acquaintance-party-2026-${shortId(visitorId).replaceAll("…", "")}.png`;
+      a.download = "CSCHumanBingoAkwe2026.png";
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -3199,6 +3354,12 @@
     function hideNotice() {
       notice.classList.remove("show");
       notice.textContent = "";
+    }
+
+    function showLocalSaveConfirmation(message) {
+      saveConfirmMessage.textContent = message;
+      if (saveConfirmDialog.open) saveConfirmDialog.close();
+      saveConfirmDialog.showModal();
     }
 
     let toastTimer = null;
