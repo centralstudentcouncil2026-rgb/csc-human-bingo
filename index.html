@@ -2861,6 +2861,12 @@
       user-select: none;
     }
 
+    .bingo-design picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     .grid {
       position: absolute;
       inset: 0;
@@ -2898,6 +2904,13 @@
       box-shadow: none;
     }
 
+    @media (max-width: 720px) {
+      .bingo-design {
+        width: 100%;
+        aspect-ratio: 941 / 1672;
+      }
+    }
+
     .square:focus-visible {
       outline: 3px solid rgba(0, 87, 217, 0.75);
       outline-offset: 2px;
@@ -2915,6 +2928,25 @@
     .square:nth-child(10) { left: 27.93%; top: 64.00%; width: 21.48%; height: 19.01%; }
     .square:nth-child(11) { left: 51.27%; top: 64.00%; width: 21.48%; height: 19.01%; }
     .square:nth-child(12) { left: 74.80%; top: 64.00%; width: 21.48%; height: 19.01%; }
+
+    @media (max-width: 720px) {
+      .square {
+        border-radius: 9.5% / 6%;
+      }
+
+      .square:nth-child(1) { left: 3.19%; top: 23.27%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(2) { left: 27.31%; top: 23.27%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(3) { left: 50.80%; top: 23.27%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(4) { left: 74.39%; top: 23.27%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(5) { left: 3.19%; top: 44.68%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(6) { left: 27.31%; top: 44.68%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(7) { left: 50.80%; top: 44.68%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(8) { left: 74.39%; top: 44.68%; width: 22.32%; height: 20.16%; }
+      .square:nth-child(9) { left: 3.19%; top: 66.03%; width: 22.32%; height: 19.62%; }
+      .square:nth-child(10) { left: 27.31%; top: 66.03%; width: 22.32%; height: 19.62%; }
+      .square:nth-child(11) { left: 50.80%; top: 66.03%; width: 22.32%; height: 19.62%; }
+      .square:nth-child(12) { left: 74.39%; top: 66.03%; width: 22.32%; height: 19.62%; }
+    }
 
     .camera-watermark,
     .square-content {
@@ -3027,6 +3059,29 @@
       box-shadow: 0 8px 16px rgba(8, 47, 143, 0.18);
     }
 
+    @media (max-width: 720px) {
+      .progress-top span:last-child {
+        left: 81.5%;
+        top: 88.95%;
+        width: 10%;
+        font-size: clamp(0.68rem, 3.5vw, 1.18rem);
+      }
+
+      .bar {
+        left: 21.25%;
+        top: 93.25%;
+        width: 68.45%;
+        height: 1.08%;
+      }
+
+      .completed-card-btn {
+        left: 34%;
+        top: 96.25%;
+        width: 32%;
+        height: 2.1%;
+      }
+    }
+
     .toast {
       bottom: max(14px, env(safe-area-inset-bottom));
     }
@@ -3073,7 +3128,7 @@
       <div class="notice" id="notice"></div>
       <section class="bingo-card" aria-label="4 by 3 Bingo Card">
         <div class="bingo-design">
-          <img src="human-bingo-design.png" class="design-background" alt="CSC Acquaintance Party 2026 Human Bingo card" />
+          <img id="designBackground" src="01_human_bingo_1024x1536.png" class="design-background" alt="CSC Acquaintance Party 2026 Human Bingo card" />
           <div class="grid" id="bingoGrid"></div>
           <aside class="bottom-progress" aria-label="Bingo progress">
             <div class="progress-top">
@@ -3252,6 +3307,101 @@
     const GRID_ROWS = 3;
     const TOTAL_SQUARES = GRID_COLUMNS * GRID_ROWS;
 
+    const BINGO_DESIGNS = [
+      {
+        src: "01_human_bingo_1024x1536.png",
+        width: 1024,
+        height: 1536,
+        columns: [4.69, 27.93, 51.27, 74.80],
+        rows: [21.94, 43.10, 64.00],
+        zoneWidth: 21.48,
+        zoneHeights: [19.79, 19.79, 19.01],
+        progress: { count: [83.2, 86.95, 7.6], bar: [21.1, 91.55, 69.2, 1.43], button: [36, 94.8, 28, 2.6] }
+      },
+      {
+        src: "02_human_bingo_941x1672.png",
+        width: 941,
+        height: 1672,
+        columns: [3.19, 27.31, 50.80, 74.39],
+        rows: [23.27, 44.68, 66.03],
+        zoneWidth: 22.32,
+        zoneHeights: [20.16, 20.16, 19.62],
+        progress: { count: [81.5, 88.95, 10], bar: [21.25, 93.25, 68.45, 1.08], button: [34, 96.25, 32, 2.1] }
+      },
+      {
+        src: "03_human_bingo_1045x1505.png",
+        width: 1045,
+        height: 1505,
+        columns: [7.55, 29.38, 50.72, 72.25],
+        rows: [23.65, 44.52, 65.38],
+        zoneWidth: 20.65,
+        zoneHeights: [20.10, 20.10, 19.34],
+        progress: { count: [82.1, 88.3, 9], bar: [24.6, 92.45, 61.5, 1.18], button: [36, 95.3, 28, 2.2] }
+      },
+      {
+        src: "04_human_bingo_852x1845.png",
+        width: 852,
+        height: 1845,
+        columns: [3.52, 27.58, 50.59, 73.83],
+        rows: [23.85, 44.88, 66.56],
+        zoneWidth: 22.65,
+        zoneHeights: [20.16, 20.16, 18.97],
+        progress: { count: [81.5, 88.7, 10], bar: [22.9, 93.45, 65.7, 1.0], button: [34, 96.35, 32, 1.95] }
+      },
+      {
+        src: "05_human_bingo_853x1844.png",
+        width: 853,
+        height: 1844,
+        columns: [3.52, 27.58, 50.59, 73.83],
+        rows: [23.85, 44.88, 66.56],
+        zoneWidth: 22.65,
+        zoneHeights: [20.16, 20.16, 18.97],
+        progress: { count: [81.5, 88.7, 10], bar: [22.9, 93.45, 65.7, 1.0], button: [34, 96.35, 32, 1.95] }
+      },
+      {
+        src: "06_human_bingo_852x1846.png",
+        width: 852,
+        height: 1846,
+        columns: [3.52, 27.58, 50.59, 73.83],
+        rows: [23.85, 44.88, 66.56],
+        zoneWidth: 22.65,
+        zoneHeights: [20.16, 20.16, 18.97],
+        progress: { count: [81.5, 88.7, 10], bar: [22.9, 93.45, 65.7, 1.0], button: [34, 96.35, 32, 1.95] }
+      },
+      {
+        src: "07_human_bingo_992x1586.png",
+        width: 992,
+        height: 1586,
+        columns: [4.9, 28.15, 51.15, 74.2],
+        rows: [22.65, 43.95, 65.15],
+        zoneWidth: 21.35,
+        zoneHeights: [20.0, 20.0, 19.2],
+        progress: { count: [82.5, 88.15, 8.5], bar: [22.3, 92.55, 66.4, 1.15], button: [35, 95.35, 30, 2.05] }
+      },
+      {
+        src: "08_human_bingo_1086x1448.png",
+        width: 1086,
+        height: 1448,
+        columns: [7.37, 29.10, 50.64, 72.28],
+        rows: [24.17, 44.34, 65.06],
+        zoneWidth: 20.44,
+        zoneHeights: [19.13, 19.13, 18.8],
+        progress: { count: [82.5, 87.8, 8.5], bar: [23.0, 92.35, 64.2, 1.22], button: [36, 95.1, 28, 2.1] }
+      },
+      {
+        src: "09_human_bingo_841x1870.png",
+        width: 841,
+        height: 1870,
+        columns: [5.1, 35.55, 66.6],
+        rows: [20.85, 40.65, 61.0, 79.7],
+        zoneWidth: 27.8,
+        zoneHeights: [18.6, 18.6, 18.0, 10.3],
+        progress: { count: [81.5, 88.8, 10], bar: [22.9, 93.5, 65.6, 1.0], button: [34, 96.35, 32, 1.9] }
+      }
+    ];
+
+    let activeDesign = BINGO_DESIGNS[0];
+
     const DEFAULT_TASKS = [
       "Find someone from COB who loves playing basketball",
       "Find someone from CTE who wants to become a teacher abroad",
@@ -3284,6 +3434,8 @@
     let currentPreviewFileName = "human-bingo-preview.png";
     let currentPreviewShareMeta = { title: "Human Bingo Preview", text: "Preview from Human Bingo." };
 
+    const bingoDesign = document.querySelector(".bingo-design");
+    const designBackground = document.getElementById("designBackground");
     const grid = document.getElementById("bingoGrid");
     const notice = document.getElementById("notice");
     const visitorIdText = document.getElementById("visitorIdText");
@@ -3359,8 +3511,11 @@
 
     window.addEventListener("beforeunload", stopCamera);
     window.addEventListener("pagehide", stopCamera);
+    window.addEventListener("resize", handleResponsiveDesignChange);
+    window.addEventListener("orientationchange", handleResponsiveDesignChange);
 
     async function init() {
+      applyResponsiveDesign();
       renderGrid();
       updateProgress();
 
@@ -3484,6 +3639,74 @@
         button.appendChild(content);
         grid.appendChild(button);
       });
+      applyZonePositions();
+    }
+
+    function handleResponsiveDesignChange() {
+      window.requestAnimationFrame(() => {
+        applyResponsiveDesign();
+        applyZonePositions();
+      });
+    }
+
+    function selectDesignForViewport() {
+      const viewportRatio = window.innerWidth / Math.max(window.innerHeight, 1);
+      return BINGO_DESIGNS.reduce((best, design) => {
+        const bestDistance = Math.abs((best.width / best.height) - viewportRatio);
+        const designDistance = Math.abs((design.width / design.height) - viewportRatio);
+        return designDistance < bestDistance ? design : best;
+      }, BINGO_DESIGNS[0]);
+    }
+
+    function applyResponsiveDesign() {
+      activeDesign = selectDesignForViewport();
+      bingoDesign.style.aspectRatio = `${activeDesign.width} / ${activeDesign.height}`;
+      bingoDesign.style.width = `min(100%, ${activeDesign.width}px)`;
+      bingoDesign.style.maxWidth = `${activeDesign.width}px`;
+
+      if (!designBackground.src.endsWith(activeDesign.src)) {
+        designBackground.src = activeDesign.src;
+      }
+
+      applyProgressOverlay(activeDesign.progress);
+    }
+
+    function applyZonePositions() {
+      const zones = Array.from(grid.children);
+      zones.forEach((zone, index) => {
+        const designColumns = activeDesign.columns.length;
+        const row = Math.floor(index / designColumns);
+        const column = index % designColumns;
+        const left = activeDesign.columns[column];
+        const top = activeDesign.rows[row];
+        const height = activeDesign.zoneHeights[row];
+
+        zone.style.left = `${left}%`;
+        zone.style.top = `${top}%`;
+        zone.style.width = `${activeDesign.zoneWidth}%`;
+        zone.style.height = `${height}%`;
+      });
+    }
+
+    function applyProgressOverlay(progressOverlay) {
+      if (!progressOverlay) return;
+
+      const [countLeft, countTop, countWidth] = progressOverlay.count;
+      progressText.style.left = `${countLeft}%`;
+      progressText.style.top = `${countTop}%`;
+      progressText.style.width = `${countWidth}%`;
+
+      const [barLeft, barTop, barWidth, barHeight] = progressOverlay.bar;
+      progressBar.parentElement.style.left = `${barLeft}%`;
+      progressBar.parentElement.style.top = `${barTop}%`;
+      progressBar.parentElement.style.width = `${barWidth}%`;
+      progressBar.parentElement.style.height = `${barHeight}%`;
+
+      const [buttonLeft, buttonTop, buttonWidth, buttonHeight] = progressOverlay.button;
+      openCompletedCardBtn.style.left = `${buttonLeft}%`;
+      openCompletedCardBtn.style.top = `${buttonTop}%`;
+      openCompletedCardBtn.style.width = `${buttonWidth}%`;
+      openCompletedCardBtn.style.height = `${buttonHeight}%`;
     }
 
     function updateProgress() {
