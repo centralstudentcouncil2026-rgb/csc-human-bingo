@@ -1804,7 +1804,7 @@
       }
 
       .collage-popup-subtitle {
-        font-size: clamp(0.98rem, 5vw, 1.45rem) !important;
+        font-size: clamp(0.68rem, 3.4vw, 0.92rem) !important;
         letter-spacing: 0.04em;
       }
 
@@ -1912,10 +1912,10 @@
 
     .collage-popup-subtitle {
       max-width: 370px !important;
-      margin: 0 auto 18px !important;
+      margin: 0 auto 12px !important;
       font-family: var(--poster-display-font);
-      font-size: clamp(2rem, 9.4vw, 2.7rem) !important;
-      line-height: 0.94 !important;
+      font-size: clamp(0.72rem, 3vw, 1rem) !important;
+      line-height: 1.2 !important;
       letter-spacing: 0.025em;
       color: #030303 !important;
       text-align: center;
@@ -1989,8 +1989,8 @@
       }
 
       .collage-popup-subtitle {
-        max-width: 780px !important;
-        font-size: clamp(2.35rem, 4.5vw, 4rem) !important;
+        max-width: 560px !important;
+        font-size: clamp(0.86rem, 1.45vw, 1.15rem) !important;
       }
 
       .collage-preview-card {
@@ -2094,7 +2094,7 @@
 
     @media (max-width: 430px) {
       .collage-popup-title { font-size: clamp(1.65rem, 8.4vw, 2.35rem); }
-      .collage-popup-subtitle { font-size: clamp(1rem, 5.4vw, 1.45rem) !important; }
+      .collage-popup-subtitle { font-size: clamp(0.68rem, 3.4vw, 0.92rem) !important; }
     }
 
 
@@ -3876,7 +3876,7 @@
 
     document.getElementById("closeCongratsBtn").addEventListener("click", () => congratsDialog.close());
     saveCollageBtn.addEventListener("click", saveCollageToDevice);
-    saveIndividualPhotosBtn.addEventListener("click", openIndividualPhotos);
+    saveIndividualPhotosBtn.addEventListener("click", saveAllIndividualPhotosToDevice);
     closeIndividualPhotosBtn.addEventListener("click", () => individualPhotosDialog.close());
     closeFullPreviewBtn.addEventListener("click", closeFullPreview);
     savePreviewedPhotoBtn.addEventListener("click", saveCurrentPreviewToDevice);
@@ -4750,6 +4750,83 @@
     function openIndividualPhotos() {
       renderIndividualPhotoGrid();
       if (!individualPhotosDialog.open) individualPhotosDialog.showModal();
+    }
+
+    async function saveAllIndividualPhotosToDevice() {
+      const photoItems = Array.from({ length: TOTAL_SQUARES }, (_, index) => ({
+        index,
+        item: progress[index]
+      })).filter(({ item }) => item?.imageUrl);
+
+      if (!photoItems.length) {
+        showToast("No photos are available to save yet.");
+        return;
+      }
+
+      const originalText = saveIndividualPhotosBtn.innerHTML;
+      saveIndividualPhotosBtn.disabled = true;
+      saveIndividualPhotosBtn.innerHTML = `<span class="spinner"></span> Saving...`;
+
+      try {
+        if (window.showDirectoryPicker) {
+          const directoryHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+          const photoEntries = await fetchRawIndividualPhotoEntries(photoItems);
+
+          await Promise.all(photoEntries.map(async ({ blob, fileName }) => {
+            const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+          }));
+
+          showToast(`${photoEntries.length} raw photos saved to your device.`);
+          showLocalSaveConfirmation(`${photoEntries.length} raw Human Bingo photos saved locally on your device.`);
+          return;
+        }
+
+        const photoEntries = await fetchRawIndividualPhotoEntries(photoItems);
+        const files = photoEntries.map(({ blob, fileName }) => new File([blob], fileName, {
+          type: blob.type || "image/jpeg"
+        }));
+
+        if (navigator.canShare?.({ files })) {
+          await navigator.share({
+            title: "Human Bingo Raw Photos",
+            text: "Raw photos from my completed Human Bingo card.",
+            files
+          });
+          showToast(`${photoEntries.length} raw photos shared.`);
+          showLocalSaveConfirmation(`${photoEntries.length} raw Human Bingo photos shared from your device.`);
+          return;
+        }
+
+        photoEntries.forEach(({ blob, fileName }, index) => {
+          setTimeout(() => triggerBlobDownload(blob, fileName), index * 180);
+        });
+        showToast(`${photoEntries.length} raw photo downloads started.`);
+        showLocalSaveConfirmation(`${photoEntries.length} raw Human Bingo photo downloads started.`);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error(error);
+          showToast(error.message || "Could not save all individual photos.");
+        }
+      } finally {
+        saveIndividualPhotosBtn.innerHTML = originalText;
+        saveIndividualPhotosBtn.disabled = false;
+      }
+    }
+
+    async function fetchRawIndividualPhotoEntries(photoItems) {
+      return await Promise.all(photoItems.map(async ({ index, item }) => {
+        const response = await fetch(item.imageUrl);
+        if (!response.ok) throw new Error(`Could not load square ${index + 1}.`);
+
+        const blob = await response.blob();
+        const extension = (blob.type || "image/jpeg").includes("png") ? "png" : "jpg";
+        const fileName = `human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
+
+        return { blob, fileName };
+      }));
     }
 
     function renderIndividualPhotoGrid() {
