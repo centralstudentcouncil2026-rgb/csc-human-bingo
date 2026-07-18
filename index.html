@@ -3316,7 +3316,7 @@
     .progress-top span:last-child {
       position: absolute;
       left: 91.15%;
-      top: 93.34%;
+      top: 93.72%;
       width: 8.4%;
       min-width: 0;
       min-height: 0;
@@ -3500,6 +3500,11 @@
 
     #switchCameraBtn {
       grid-column: 1;
+      width: 58px;
+      height: 58px;
+      min-width: 58px;
+      min-height: 58px;
+      padding: 0;
     }
 
     #captureBtn,
@@ -3509,9 +3514,14 @@
 
     #savePhotoBtn {
       grid-column: 3;
-      min-width: 74px;
-      padding-inline: 12px;
+      width: 58px;
+      height: 58px;
+      min-width: 58px;
+      min-height: 58px;
+      padding: 0;
+      border-radius: 999px;
       white-space: nowrap;
+      font-size: 0.82rem;
     }
 
     .icon-button {
@@ -3546,6 +3556,31 @@
       border-radius: 999px;
       color: #08204a;
       background: #ffffff;
+    }
+
+    .completed-challenge-label {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      bottom: 6%;
+      z-index: 2;
+      display: block;
+      padding: 12% 4% 3%;
+      color: #ffffff;
+      font-family: "Arial Black", Impact, system-ui, sans-serif;
+      font-size: clamp(0.42rem, 2.05vw, 0.82rem);
+      line-height: 1.08;
+      text-align: center;
+      letter-spacing: 0;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.95);
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.68));
+      pointer-events: none;
+    }
+
+    @media (min-width: 760px) {
+      .completed-challenge-label {
+        font-size: clamp(0.62rem, 1.2vw, 0.9rem);
+      }
     }
 
   </style>
@@ -3616,7 +3651,7 @@
           <button class="ghost hidden" id="retakeBtn" type="button">Retake</button>
         </div>
         <div class="right-actions">
-          <button id="savePhotoBtn" type="button" disabled>Save to Square</button>
+          <button id="savePhotoBtn" type="button" disabled>Save</button>
         </div>
       </div>
     </div>
@@ -3732,7 +3767,7 @@
         zoneWidth: 30.93,
         zoneHeights: [17.40, 17.35, 17.35, 17.35],
         progress: {
-          count: [91.15, 93.34, 8.4],
+          count: [91.15, 93.72, 8.4],
           bar: [6.4, 94.78, 89.3, 2.05],
           button: [36, 96.9, 28, 2.1]
         }
@@ -3763,7 +3798,7 @@
     let currentIndex = null;
     let stream = null;
     let cameraPermissionAsked = false;
-    let currentFacingMode = "environment";
+    let currentFacingMode = "user";
     let streamFacingMode = null;
     let capturedBlob = null;
     let capturedDataUrl = null;
@@ -4110,6 +4145,11 @@
           img.src = progress[index].imageUrl;
           img.alt = `Photo for ${task}`;
           button.appendChild(img);
+
+          const completedLabel = document.createElement("span");
+          completedLabel.className = "completed-challenge-label";
+          completedLabel.textContent = task;
+          button.appendChild(completedLabel);
         }
 
         const content = document.createElement("div");
@@ -4214,6 +4254,7 @@
 
     async function openCamera(index) {
       currentIndex = index;
+      currentFacingMode = "user";
       capturedBlob = null;
       capturedDataUrl = null;
       applyCameraFrameForSquare(index);
