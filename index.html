@@ -3750,7 +3750,7 @@
     const SUPABASE_ANON_KEY = "sb_publishable_m8bfgsrLN15azcgyRu8i2Q_Ij77Npaq";
     const STORAGE_BUCKET = "bingo-photos";
     const TABLE_NAME = "bingo_progress";
-    const PROGRESS_ROW_INDEX = 12;
+    const PROGRESS_ROW_INDEX = 0;
     const PROGRESS_ROW_TASK = "__human_bingo_progress_json__";
 
     const GRID_COLUMNS = 4;
@@ -4031,7 +4031,6 @@
         .from(TABLE_NAME)
         .select("square_index, task, image_path, updated_at")
         .eq("user_id", visitorId)
-        .neq("square_index", PROGRESS_ROW_INDEX)
         .order("square_index", { ascending: true });
 
       if (error) throw error;
