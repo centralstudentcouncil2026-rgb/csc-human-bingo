@@ -3482,7 +3482,7 @@
       width: 100%;
       height: 100%;
       aspect-ratio: auto;
-      object-fit: contain;
+      object-fit: cover;
       background: #020817;
       border-radius: inherit;
     }
@@ -4686,13 +4686,13 @@
       };
     }
 
-    function drawVideoContain(ctx, video, x, y, w, h) {
-      const scale = Math.min(w / video.videoWidth, h / video.videoHeight);
-      const dw = video.videoWidth * scale;
-      const dh = video.videoHeight * scale;
-      const dx = x + (w - dw) / 2;
-      const dy = y + (h - dh) / 2;
-      ctx.drawImage(video, dx, dy, dw, dh);
+    function drawVideoCover(ctx, video, x, y, w, h) {
+      const scale = Math.max(w / video.videoWidth, h / video.videoHeight);
+      const sw = w / scale;
+      const sh = h / scale;
+      const sx = (video.videoWidth - sw) / 2;
+      const sy = (video.videoHeight - sh) / 2;
+      ctx.drawImage(video, sx, sy, sw, sh, x, y, w, h);
     }
 
     async function capturePhoto() {
@@ -4714,10 +4714,10 @@
         ctx.save();
         ctx.translate(captureCanvas.width, 0);
         ctx.scale(-1, 1);
-        drawVideoContain(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+        drawVideoCover(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
         ctx.restore();
       } else {
-        drawVideoContain(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
+        drawVideoCover(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
       }
 
       capturedBlob = await canvasToBlob(captureCanvas, "image/jpeg", 0.88);
