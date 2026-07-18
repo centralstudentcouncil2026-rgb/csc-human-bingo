@@ -3761,6 +3761,8 @@
     const PROGRESS_ROW_TASK = "__human_bingo_progress_json__";
     const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
     const LOCAL_PROGRESS_CACHE_PREFIX = "human-bingo-progress";
+    const CAPTURE_LONG_SIDE = 1100;
+    const CAPTURE_JPEG_QUALITY = 0.82;
 
     const GRID_COLUMNS = 4;
     const GRID_ROWS = 3;
@@ -4682,18 +4684,17 @@
     function getCaptureOutputSize(index) {
       const cell = getDesignCell(activeDesign || selectDesignForViewport(), index);
       const aspect = cell?.w && cell?.h ? cell.w / cell.h : 1;
-      const longSide = 1400;
 
       if (aspect >= 1) {
         return {
-          width: longSide,
-          height: Math.round(longSide / aspect)
+          width: CAPTURE_LONG_SIDE,
+          height: Math.round(CAPTURE_LONG_SIDE / aspect)
         };
       }
 
       return {
-        width: Math.round(longSide * aspect),
-        height: longSide
+        width: Math.round(CAPTURE_LONG_SIDE * aspect),
+        height: CAPTURE_LONG_SIDE
       };
     }
 
@@ -4731,8 +4732,8 @@
         drawVideoCover(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
       }
 
-      capturedBlob = await canvasToBlob(captureCanvas, "image/jpeg", 0.88);
-      capturedDataUrl = captureCanvas.toDataURL("image/jpeg", 0.88);
+      capturedBlob = await canvasToBlob(captureCanvas, "image/jpeg", CAPTURE_JPEG_QUALITY);
+      capturedDataUrl = captureCanvas.toDataURL("image/jpeg", CAPTURE_JPEG_QUALITY);
       photoPreview.src = capturedDataUrl;
       photoPreview.style.display = "block";
       cameraVideo.style.display = "none";
@@ -5040,22 +5041,18 @@
         if (uploadError) throw uploadError;
         uploaded = true;
 
-        const { data: signedData, error: signedError } = await supabaseClient
-          .storage
-          .from(STORAGE_BUCKET)
-          .createSignedUrl(filePath, SIGNED_URL_TTL);
-
-        if (signedError) throw signedError;
+        if (progress[index]?.imagePath !== filePath) {
+          supabaseClient.storage.from(STORAGE_BUCKET).remove([filePath]).catch(() => {});
+          return;
+        }
 
         const currentVisibleUrl = progress[index]?.imagePath === filePath
           ? progress[index].imageUrl
           : "";
-        const displayUrl = await getReadyImageUrl(signedData.signedUrl, currentVisibleUrl);
         const syncedItem = {
           task: tasks[index],
           imagePath: filePath,
-          imageUrl: displayUrl,
-          remoteImageUrl: signedData.signedUrl,
+          imageUrl: currentVisibleUrl,
           updatedAt: savedAt
         };
         const nextProgress = {
@@ -5075,6 +5072,7 @@
         renderGrid();
         updateProgress();
         showToast(oldPath ? "Photo replaced!" : "Photo saved!");
+        promoteRemoteImageWhenReady({ index, filePath, savedAt });
 
         if (completedCount() === TOTAL_SQUARES && !hasPendingSaves()) {
           await openCongrats(false);
@@ -5107,6 +5105,37 @@
 
     function hasPendingSaves() {
       return Object.values(progress).some(item => item?.pending);
+    }
+
+    async function promoteRemoteImageWhenReady({ index, filePath, savedAt }) {
+      try {
+        const { data: signedData, error: signedError } = await supabaseClient
+          .storage
+          .from(STORAGE_BUCKET)
+          .createSignedUrl(filePath, SIGNED_URL_TTL);
+
+        if (signedError || !signedData?.signedUrl) throw signedError || new Error("Signed URL was not created.");
+
+        await loadImage(signedData.signedUrl);
+        if (progress[index]?.imagePath !== filePath) return;
+
+        progress = {
+          ...progress,
+          [index]: {
+            ...progress[index],
+            imageUrl: signedData.signedUrl,
+            remoteImageUrl: signedData.signedUrl,
+            updatedAt: savedAt
+          }
+        };
+
+        latestCollageBlob = null;
+        cacheProgressLocally(progress);
+        renderGrid();
+        updateProgress();
+      } catch (error) {
+        console.warn("Remote photo is synced but not ready to display yet.", error);
+      }
     }
 
     function goBackToEdit() {
@@ -5471,18 +5500,6 @@
         img.onerror = reject;
         img.src = src;
       });
-    }
-
-    async function getReadyImageUrl(remoteUrl, fallbackUrl = "") {
-      if (!remoteUrl) return fallbackUrl;
-
-      try {
-        await loadImage(remoteUrl);
-        return remoteUrl;
-      } catch (error) {
-        console.warn("Remote photo is not ready yet. Keeping the instant local image visible.", error);
-        return fallbackUrl || remoteUrl;
-      }
     }
 
     function drawImageCover(ctx, img, x, y, w, h) {
