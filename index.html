@@ -2562,7 +2562,7 @@
     }
 
     .bottom-progress::before {
-      content: "🏆";
+      content: "";
       grid-area: icon;
       align-self: center;
       width: clamp(50px, 14vw, 78px);
@@ -3381,9 +3381,9 @@
   <main class="app">
     <header class="topbar" aria-label="Event header">
       <div class="party-banner" aria-label="CSC Acquaintance Party 2026">
-        <span class="heart heart-white" aria-hidden="true">♡</span>
+        <span class="heart heart-white" aria-hidden="true"></span>
         <h1>CSC Acquaintance Party 2026</h1>
-        <span class="heart heart-blue" aria-hidden="true">♡</span>
+        <span class="heart heart-blue" aria-hidden="true"></span>
       </div>
       <div class="blue-divider" aria-hidden="true"></div>
       <div class="human-title">HUMAN BINGO</div>
@@ -3427,9 +3427,9 @@
 
       <div class="modal-actions">
         <div class="left-actions">
-          <button class="secondary" id="captureBtn" type="button">📸 Capture</button>
+          <button class="secondary" id="captureBtn" type="button">Capture</button>
           <button class="ghost hidden" id="retakeBtn" type="button">Retake</button>
-          <button class="ghost" id="switchCameraBtn" type="button">🔄 Switch Camera</button>
+          <button class="ghost" id="switchCameraBtn" type="button">Switch Camera</button>
         </div>
         <div class="right-actions">
           <button id="savePhotoBtn" type="button" disabled>Save to Square</button>
@@ -3441,7 +3441,7 @@
   <dialog id="congratsDialog" class="collage-popup-dialog">
     <div class="modal-body congrats collage-popup-body">
       <button class="collage-popup-close" id="closeCongratsBtn" type="button" aria-label="Close completed card popup">Close</button>
-      <div class="collage-popup-title">Congratulations! <span aria-hidden="true">🎉</span></div>
+      <div class="collage-popup-title">Congratulations!</div>
       <p class="collage-popup-subtitle">Your Human Bingo Card Collage is Ready!</p>
 
       <div class="collage-template-frame">
@@ -3452,9 +3452,9 @@
 
       <div class="completion-actions collage-popup-actions" aria-label="Completed collage actions">
         <button id="saveCollageBtn" type="button">Save Collage</button>
-        <button class="edit-btn" id="editAgainBtn" type="button">✏️ Edit Photos</button>
-        <button class="edit-btn" id="saveIndividualPhotosBtn" type="button">🖼️ Save Individual Photo</button>
-        <button class="danger" id="modalResetBtn" type="button">🔄 Reset Bingo</button>
+        <button class="edit-btn" id="editAgainBtn" type="button">Edit Photos</button>
+        <button class="edit-btn" id="saveIndividualPhotosBtn" type="button">Save Individual Photo</button>
+        <button class="danger" id="modalResetBtn" type="button">Reset Bingo</button>
       </div>
       <div class="post-save" id="postSaveActions" aria-live="polite">
         <p>Saved! You can still edit photos or reset the bingo card.</p>
@@ -3483,7 +3483,7 @@
         <img id="fullPreviewImage" alt="Full preview" />
       </div>
       <div class="full-preview-actions">
-        <button id="savePreviewedPhotoBtn" type="button">💾 Save This Photo</button>
+        <button id="savePreviewedPhotoBtn" type="button">Save This Photo</button>
       </div>
     </div>
   </dialog>
@@ -3510,7 +3510,7 @@
       <button class="ghost" id="closeSaveConfirmTopBtn" type="button">Close</button>
     </div>
     <div class="save-confirm-body">
-      <div class="save-confirm-icon" aria-hidden="true">✓</div>
+      <div class="save-confirm-icon" aria-hidden="true">OK</div>
       <h3>Saved Successfully</h3>
       <p id="saveConfirmMessage">Your file was saved locally on your device.</p>
       <button id="closeSaveConfirmBtn" type="button">Okay</button>
@@ -3931,7 +3931,7 @@
         const content = document.createElement("div");
         content.className = "square-content";
         content.innerHTML = `
-          <span class="num">${done ? "✓" : index + 1}</span>
+          <span class="num">${done ? "Done" : index + 1}</span>
           <span class="task">${escapeHtml(task)}</span>
         `;
         button.appendChild(content);
@@ -4395,8 +4395,8 @@
               <strong>Square ${index + 1}</strong>
               <span>${escapeHtml(tasks[index])}</span>
               <div class="photo-buttons">
-                <button class="preview-photo-btn" type="button" data-preview-photo-index="${index}">🔎 Preview Photo</button>
-                <button type="button" data-photo-index="${index}">💾 Save Photo</button>
+                <button class="preview-photo-btn" type="button" data-preview-photo-index="${index}">Preview Photo</button>
+                <button type="button" data-photo-index="${index}">Save Photo</button>
               </div>
             </div>
           `;
@@ -4604,7 +4604,7 @@
         renderGrid();
         updateProgress();
         closeCamera();
-        showToast(oldPath ? "Photo replaced! ✨" : "Photo saved! ✨");
+        showToast(oldPath ? "Photo replaced!" : "Photo saved!");
 
         if (completedCount() === TOTAL_SQUARES) {
           await openCongrats(false);
@@ -4768,10 +4768,76 @@
         roundedRectPath(ctx, cell.x, cell.y, cell.w, cell.h, Math.min(cell.w, cell.h) * 0.075);
         ctx.clip();
         drawImageCover(ctx, img, cell.x, cell.y, cell.w, cell.h);
+        drawChallengeTextOverlay(ctx, item.task || tasks[index], cell);
         ctx.restore();
       } catch (error) {
         console.warn("Could not load image for poster collage", error);
       }
+    }
+
+    function drawChallengeTextOverlay(ctx, text, cell) {
+      const label = String(text || "").trim();
+      if (!label) return;
+
+      const maxWidth = cell.w * 0.88;
+      const maxTextHeight = cell.h * 0.48;
+      let fontSize = Math.round(cell.w * 0.074);
+      const minFontSize = Math.max(13, Math.round(cell.w * 0.046));
+      let lines = [];
+      let lineHeight = 0;
+
+      while (fontSize >= minFontSize) {
+        ctx.font = `800 ${fontSize}px Arial, Helvetica, sans-serif`;
+        lines = wrapCanvasText(ctx, label, maxWidth);
+        lineHeight = fontSize * 1.15;
+        if (lines.length * lineHeight <= maxTextHeight) break;
+        fontSize -= 1;
+      }
+
+      const overlay = ctx.createLinearGradient(0, cell.y + cell.h * 0.36, 0, cell.y + cell.h);
+      overlay.addColorStop(0, "rgba(0, 0, 0, 0)");
+      overlay.addColorStop(0.45, "rgba(0, 0, 0, 0.34)");
+      overlay.addColorStop(1, "rgba(0, 0, 0, 0.72)");
+      ctx.fillStyle = overlay;
+      ctx.fillRect(cell.x, cell.y, cell.w, cell.h);
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.64)";
+      ctx.lineWidth = Math.max(3, fontSize * 0.12);
+      ctx.lineJoin = "round";
+      ctx.font = `800 ${fontSize}px Arial, Helvetica, sans-serif`;
+
+      const totalHeight = (lines.length - 1) * lineHeight;
+      const startY = cell.y + cell.h * 0.78 - totalHeight / 2;
+      const centerX = cell.x + cell.w / 2;
+
+      lines.forEach((line, lineIndex) => {
+        const y = startY + lineIndex * lineHeight;
+        ctx.strokeText(line, centerX, y);
+        ctx.fillText(line, centerX, y);
+      });
+    }
+
+    function wrapCanvasText(ctx, text, maxWidth) {
+      const words = text.split(/\s+/).filter(Boolean);
+      const lines = [];
+      let currentLine = "";
+
+      words.forEach(word => {
+        const nextLine = currentLine ? `${currentLine} ${word}` : word;
+        if (ctx.measureText(nextLine).width <= maxWidth || !currentLine) {
+          currentLine = nextLine;
+          return;
+        }
+
+        lines.push(currentLine);
+        currentLine = word;
+      });
+
+      if (currentLine) lines.push(currentLine);
+      return lines;
     }
 
     async function saveCollageToDevice() {
