@@ -3999,6 +3999,7 @@
             task: item.task || tasks[squareIndex],
             imagePath: item.imagePath,
             imageUrl: item.imageUrl,
+            remoteImageUrl: item.remoteImageUrl || item.imageUrl,
             updatedAt: item.updatedAt || ""
           };
         });
@@ -4019,11 +4020,21 @@
       try {
         const items = {};
         Object.entries(sourceProgress).forEach(([index, item]) => {
-          if (!item?.imagePath || !item?.imageUrl || item.pending) return;
+          const cacheableImageUrl = item?.remoteImageUrl || item?.imageUrl || "";
+          if (
+            !item?.imagePath ||
+            !cacheableImageUrl ||
+            item.pending ||
+            cacheableImageUrl.startsWith("data:") ||
+            cacheableImageUrl.startsWith("blob:")
+          ) {
+            return;
+          }
           items[index] = {
             task: item.task || tasks[Number(index)] || "",
             imagePath: item.imagePath,
-            imageUrl: item.imageUrl,
+            imageUrl: cacheableImageUrl,
+            remoteImageUrl: cacheableImageUrl,
             updatedAt: item.updatedAt || ""
           };
         });
@@ -5036,10 +5047,15 @@
 
         if (signedError) throw signedError;
 
+        const currentVisibleUrl = progress[index]?.imagePath === filePath
+          ? progress[index].imageUrl
+          : "";
+        const displayUrl = await getReadyImageUrl(signedData.signedUrl, currentVisibleUrl);
         const syncedItem = {
           task: tasks[index],
           imagePath: filePath,
-          imageUrl: signedData.signedUrl,
+          imageUrl: displayUrl,
+          remoteImageUrl: signedData.signedUrl,
           updatedAt: savedAt
         };
         const nextProgress = {
@@ -5455,6 +5471,18 @@
         img.onerror = reject;
         img.src = src;
       });
+    }
+
+    async function getReadyImageUrl(remoteUrl, fallbackUrl = "") {
+      if (!remoteUrl) return fallbackUrl;
+
+      try {
+        await loadImage(remoteUrl);
+        return remoteUrl;
+      } catch (error) {
+        console.warn("Remote photo is not ready yet. Keeping the instant local image visible.", error);
+        return fallbackUrl || remoteUrl;
+      }
     }
 
     function drawImageCover(ctx, img, x, y, w, h) {
