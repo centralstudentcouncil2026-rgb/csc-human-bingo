@@ -4060,17 +4060,35 @@
     }
 
     async function persistProgressToSupabase(nextProgress) {
-      const { error } = await supabaseClient
-        .from(TABLE_NAME)
-        .upsert({
-          user_id: visitorId,
-          square_index: PROGRESS_ROW_INDEX,
-          task: PROGRESS_ROW_TASK,
-          image_path: serializeProgressPayloadForStorage(nextProgress),
-          updated_at: new Date().toISOString()
-        }, { onConflict: "user_id,square_index" });
+      const payload = {
+        user_id: visitorId,
+        square_index: PROGRESS_ROW_INDEX,
+        task: PROGRESS_ROW_TASK,
+        image_path: serializeProgressPayloadForStorage(nextProgress),
+        updated_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      const { data: updatedRow, error: updateError } = await supabaseClient
+        .from(TABLE_NAME)
+        .update({
+          task: payload.task,
+          image_path: payload.image_path,
+          updated_at: payload.updated_at
+        })
+        .eq("user_id", visitorId)
+        .eq("square_index", PROGRESS_ROW_INDEX)
+        .select("user_id")
+        .maybeSingle();
+
+      if (updateError) throw updateError;
+
+      if (!updatedRow) {
+        const { error: insertError } = await supabaseClient
+          .from(TABLE_NAME)
+          .insert(payload);
+
+        if (insertError) throw insertError;
+      }
 
       try {
         await supabaseClient
