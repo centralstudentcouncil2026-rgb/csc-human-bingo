@@ -1680,8 +1680,8 @@
       padding-inline: 74px;
       color: #030303;
       font-family: Impact, "Arial Black", system-ui, sans-serif;
-      font-size: clamp(2.2rem, 6.6vw, 4.85rem);
-      line-height: 0.94;
+      font-size: clamp(1.55rem, 5.2vw, 3.25rem);
+      line-height: 1;
       letter-spacing: 0.055em;
       font-weight: 1000;
       text-align: center;
@@ -1700,8 +1700,8 @@
       max-width: 920px !important;
       color: #030303 !important;
       font-family: Impact, "Arial Black", system-ui, sans-serif;
-      font-size: clamp(1.4rem, 4.2vw, 3rem) !important;
-      line-height: 1.05 !important;
+      font-size: clamp(1.05rem, 3.1vw, 2rem) !important;
+      line-height: 1.08 !important;
       letter-spacing: 0.055em;
       font-weight: 1000 !important;
       text-align: center;
@@ -1799,12 +1799,12 @@
 
       .collage-popup-title {
         padding-inline: 0;
-        font-size: clamp(2rem, 10.4vw, 3rem);
+        font-size: clamp(1.55rem, 7.8vw, 2.25rem);
         letter-spacing: 0.04em;
       }
 
       .collage-popup-subtitle {
-        font-size: clamp(1.28rem, 6.7vw, 2.1rem) !important;
+        font-size: clamp(0.98rem, 5vw, 1.45rem) !important;
         letter-spacing: 0.04em;
       }
 
@@ -1894,8 +1894,8 @@
       margin: 0 auto 10px;
       padding-inline: 0;
       font-family: var(--poster-display-font);
-      font-size: clamp(3.05rem, 13.2vw, 4.05rem);
-      line-height: 0.84;
+      font-size: clamp(1.9rem, 8.8vw, 2.8rem);
+      line-height: 0.95;
       letter-spacing: 0.025em;
       color: #030303;
       text-align: center;
@@ -1978,7 +1978,7 @@
       }
 
       .collage-popup-title {
-        font-size: clamp(4.2rem, 7.5vw, 6.35rem);
+        font-size: clamp(2.65rem, 5.2vw, 4.1rem);
       }
 
       .collage-popup-title span {
@@ -2093,8 +2093,8 @@
     }
 
     @media (max-width: 430px) {
-      .collage-popup-title { font-size: clamp(2.5rem, 10.8vw, 3.2rem); }
-      .collage-popup-subtitle { font-size: clamp(1.65rem, 7.8vw, 2.15rem) !important; }
+      .collage-popup-title { font-size: clamp(1.65rem, 8.4vw, 2.35rem); }
+      .collage-popup-subtitle { font-size: clamp(1rem, 5.4vw, 1.45rem) !important; }
     }
 
 
@@ -3560,16 +3560,16 @@
 
     .completed-challenge-label {
       position: absolute;
-      left: 5%;
-      right: 5%;
-      bottom: 6%;
+      left: 6%;
+      right: 6%;
+      bottom: 5%;
       z-index: 2;
       display: block;
-      padding: 12% 4% 3%;
+      padding: 9% 4% 2.5%;
       color: #ffffff;
       font-family: "Arial Black", Impact, system-ui, sans-serif;
-      font-size: clamp(0.42rem, 2.05vw, 0.82rem);
-      line-height: 1.08;
+      font-size: clamp(0.34rem, 1.55vw, 0.64rem);
+      line-height: 1.05;
       text-align: center;
       letter-spacing: 0;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.95);
@@ -3579,7 +3579,7 @@
 
     @media (min-width: 760px) {
       .completed-challenge-label {
-        font-size: clamp(0.62rem, 1.2vw, 0.9rem);
+        font-size: clamp(0.48rem, 0.92vw, 0.72rem);
       }
     }
 
@@ -3670,9 +3670,9 @@
       </div>
 
       <div class="completion-actions collage-popup-actions" aria-label="Completed collage actions">
-        <button id="saveCollageBtn" type="button">Save Collage</button>
         <button class="edit-btn" id="editAgainBtn" type="button">Edit Photos</button>
-        <button class="edit-btn" id="saveIndividualPhotosBtn" type="button">Save Individual Photo</button>
+        <button class="edit-btn" id="saveIndividualPhotosBtn" type="button">Save Individual Photos</button>
+        <button id="saveCollageBtn" type="button">Save Collage</button>
         <button class="danger" id="modalResetBtn" type="button">Reset Bingo</button>
       </div>
       <div class="post-save" id="postSaveActions" aria-live="polite">
@@ -4861,7 +4861,6 @@
 
       try {
         await saveBlobToDevice(currentPreviewBlob, currentPreviewFileName, currentPreviewShareMeta);
-        await tryClearStoredProgressAfterDeviceSave();
         showToast("Saved to your device.");
         showLocalSaveConfirmation("Photo saved locally on your device.");
       } catch (error) {
@@ -4898,7 +4897,6 @@
           text: `Photo from Human Bingo square ${index + 1}.`
         });
 
-        await tryClearStoredProgressAfterDeviceSave();
         showToast(`Square ${index + 1} photo saved to your device.`);
         showLocalSaveConfirmation(`Square ${index + 1} photo saved locally on your device.`);
       } catch (error) {
@@ -5145,6 +5143,8 @@
         await drawTemplateCollageCell(ctx, i, design);
       }
 
+      drawCollageProgressCount(ctx, design);
+
       return await canvasToBlob(canvas, "image/png", 1);
     }
 
@@ -5204,24 +5204,24 @@
       if (!label) return;
 
       const maxWidth = cell.w * 0.88;
-      const maxTextHeight = cell.h * 0.48;
-      let fontSize = Math.round(cell.w * 0.074);
-      const minFontSize = Math.max(13, Math.round(cell.w * 0.046));
+      const maxTextHeight = cell.h * 0.26;
+      let fontSize = Math.round(cell.w * 0.052);
+      const minFontSize = Math.max(10, Math.round(cell.w * 0.034));
       let lines = [];
       let lineHeight = 0;
 
       while (fontSize >= minFontSize) {
-        ctx.font = `800 ${fontSize}px Arial, Helvetica, sans-serif`;
+        ctx.font = `760 ${fontSize}px Arial, Helvetica, sans-serif`;
         lines = wrapCanvasText(ctx, label, maxWidth);
-        lineHeight = fontSize * 1.15;
+        lineHeight = fontSize * 1.08;
         if (lines.length * lineHeight <= maxTextHeight) break;
         fontSize -= 1;
       }
 
-      const overlay = ctx.createLinearGradient(0, cell.y + cell.h * 0.36, 0, cell.y + cell.h);
+      const overlay = ctx.createLinearGradient(0, cell.y + cell.h * 0.55, 0, cell.y + cell.h);
       overlay.addColorStop(0, "rgba(0, 0, 0, 0)");
-      overlay.addColorStop(0.45, "rgba(0, 0, 0, 0.34)");
-      overlay.addColorStop(1, "rgba(0, 0, 0, 0.72)");
+      overlay.addColorStop(0.5, "rgba(0, 0, 0, 0.30)");
+      overlay.addColorStop(1, "rgba(0, 0, 0, 0.66)");
       ctx.fillStyle = overlay;
       ctx.fillRect(cell.x, cell.y, cell.w, cell.h);
 
@@ -5229,12 +5229,12 @@
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#ffffff";
       ctx.strokeStyle = "rgba(0, 0, 0, 0.64)";
-      ctx.lineWidth = Math.max(3, fontSize * 0.12);
+      ctx.lineWidth = Math.max(2, fontSize * 0.1);
       ctx.lineJoin = "round";
-      ctx.font = `800 ${fontSize}px Arial, Helvetica, sans-serif`;
+      ctx.font = `760 ${fontSize}px Arial, Helvetica, sans-serif`;
 
       const totalHeight = (lines.length - 1) * lineHeight;
-      const startY = cell.y + cell.h * 0.78 - totalHeight / 2;
+      const startY = cell.y + cell.h * 0.84 - totalHeight / 2;
       const centerX = cell.x + cell.w / 2;
 
       lines.forEach((line, lineIndex) => {
@@ -5242,6 +5242,29 @@
         ctx.strokeText(line, centerX, y);
         ctx.fillText(line, centerX, y);
       });
+    }
+
+    function drawCollageProgressCount(ctx, design) {
+      const count = completedCount();
+      const label = `${count}/${TOTAL_SQUARES}`;
+      const progressCount = design.progress?.count;
+      if (!progressCount) return;
+
+      const [left, top, width] = progressCount;
+      const x = ((left + width / 2) / 100) * design.width;
+      const y = (top / 100) * design.height;
+      const fontSize = Math.max(24, Math.round((width / 100) * design.width * 0.42));
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = `900 ${fontSize}px Arial, Helvetica, sans-serif`;
+      ctx.lineWidth = Math.max(3, fontSize * 0.12);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.88)";
+      ctx.fillStyle = "#000000";
+      ctx.strokeText(label, x, y);
+      ctx.fillText(label, x, y);
+      ctx.restore();
     }
 
     function wrapCanvasText(ctx, text, maxWidth) {
@@ -5278,7 +5301,6 @@
           text: "My completed Human Bingo Card Collage."
         });
 
-        await tryClearStoredProgressAfterDeviceSave();
         showToast("Collage saved to your device.");
         showLocalSaveConfirmation("Bingo card saved locally as CSCHumanBingoAkwe2026.png.");
       } catch (error) {
