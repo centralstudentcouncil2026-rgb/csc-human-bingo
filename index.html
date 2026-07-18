@@ -3315,19 +3315,23 @@
 
     .progress-top span:last-child {
       position: absolute;
-      left: 88.4%;
-      top: 93.55%;
-      width: 8.2%;
+      left: 91.15%;
+      top: 93.34%;
+      width: 8.4%;
       min-width: 0;
       min-height: 0;
       padding: 0;
-      display: block;
+      display: grid;
+      place-items: center;
       color: #000000;
       background: transparent;
-      font-size: clamp(0.72rem, 3.1vw, 1.45rem);
+      font-size: clamp(0.52rem, 2.45vw, 1.08rem);
       line-height: 1;
       text-align: center;
       letter-spacing: 0;
+      white-space: nowrap;
+      transform: translate(-50%, -50%);
+      transform-origin: center;
     }
 
     .bar {
@@ -3373,6 +3377,175 @@
     .toast {
       z-index: 40;
       bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    #cameraDialog,
+    #cameraDialog.inline-card-camera[open] {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      max-width: none;
+      max-height: none;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      color: #ffffff;
+      background:
+        linear-gradient(180deg, rgba(5, 17, 40, 0.96), rgba(5, 17, 40, 0.90)),
+        var(--bingo-design-image, url("human-bingo-skyline-1080x1920.png"));
+      background-size: cover;
+      background-position: center;
+      transform: none;
+    }
+
+    #cameraDialog::backdrop,
+    #cameraDialog.inline-card-camera::backdrop {
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(10px);
+    }
+
+    #cameraDialog[open] {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    #cameraDialog .modal-head {
+      min-height: 56px;
+      padding: max(12px, env(safe-area-inset-top)) 14px 8px;
+      color: #ffffff;
+      background: transparent;
+      border: 0;
+    }
+
+    #cameraDialog .modal-head h2 {
+      color: #ffffff;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    #cameraDialog #closeCameraBtn {
+      min-height: 38px;
+      padding: 8px 12px;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    #cameraDialog .modal-body,
+    #cameraDialog.inline-card-camera .modal-body {
+      min-height: 0;
+      height: 100%;
+      padding: 0 14px max(16px, env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    #cameraDialog .help {
+      max-width: min(92vw, 680px);
+      margin: 0 auto;
+      color: rgba(255, 255, 255, 0.88);
+      text-align: center;
+      font-size: clamp(0.82rem, 2.5vw, 1rem);
+    }
+
+    #cameraDialog .camera-box,
+    #cameraDialog.inline-card-camera .camera-box.inline-preview-mounted {
+      position: relative;
+      align-self: center;
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      width: min(calc(100vw - 28px), calc((100dvh - 180px) * var(--camera-frame-aspect, 1)));
+      max-height: calc(100dvh - 180px);
+      aspect-ratio: var(--camera-frame-ratio, 1 / 1);
+      margin: 0 auto;
+      border-radius: clamp(18px, 5vw, 36px);
+      border: 2px solid rgba(255, 255, 255, 0.26);
+      background: #020817;
+      box-shadow: 0 24px 72px rgba(0, 0, 0, 0.48);
+      overflow: hidden;
+    }
+
+    #cameraDialog video,
+    #cameraDialog #photoPreview {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: auto;
+      object-fit: contain;
+      background: #020817;
+      border-radius: inherit;
+    }
+
+    #cameraDialog .modal-actions {
+      position: static;
+      display: grid;
+      grid-template-columns: minmax(74px, 1fr) auto minmax(74px, 1fr);
+      align-items: center;
+      justify-items: center;
+      gap: 14px;
+      width: min(100%, 520px);
+      margin: 0 auto;
+      padding: 8px 0 0;
+      background: transparent;
+    }
+
+    #cameraDialog .left-actions,
+    #cameraDialog .right-actions {
+      display: contents;
+    }
+
+    #switchCameraBtn {
+      grid-column: 1;
+    }
+
+    #captureBtn,
+    #retakeBtn {
+      grid-column: 2;
+    }
+
+    #savePhotoBtn {
+      grid-column: 3;
+      min-width: 74px;
+      padding-inline: 12px;
+      white-space: nowrap;
+    }
+
+    .icon-button {
+      width: 58px;
+      height: 58px;
+      min-width: 58px;
+      min-height: 58px;
+      padding: 0;
+      border-radius: 999px;
+    }
+
+    .icon-button svg {
+      width: 28px;
+      height: 28px;
+      display: block;
+    }
+
+    .capture-circle {
+      width: 76px;
+      height: 76px;
+      min-width: 76px;
+      min-height: 76px;
+      color: #08204a;
+      background: #ffffff;
+      border: 6px solid rgba(250, 204, 21, 0.96);
+      box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.16), 0 18px 32px rgba(0, 0, 0, 0.28);
+    }
+
+    #retakeBtn {
+      height: 52px;
+      min-height: 52px;
+      border-radius: 999px;
+      color: #08204a;
+      background: #ffffff;
     }
 
   </style>
@@ -3427,9 +3600,20 @@
 
       <div class="modal-actions">
         <div class="left-actions">
-          <button class="secondary" id="captureBtn" type="button">Capture</button>
+          <button class="ghost icon-button" id="switchCameraBtn" type="button" aria-label="Switch camera" title="Switch camera">
+            <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+              <path d="M17.4 22.1A19.7 19.7 0 0 1 48 17.5l3.1-3.1c1.2-1.2 3.2-.4 3.2 1.3v12.2c0 1-.8 1.8-1.8 1.8H40.3c-1.7 0-2.5-2-1.3-3.2l3.2-3.2A11.7 11.7 0 0 0 25 27.7a4 4 0 1 1-7.6-2.4v-3.2Z" fill="currentColor"/>
+              <path d="M46.6 41.9A19.7 19.7 0 0 1 16 46.5l-3.1 3.1c-1.2 1.2-3.2.4-3.2-1.3V36.1c0-1 .8-1.8 1.8-1.8h12.2c1.7 0 2.5 2 1.3 3.2l-3.2 3.2A11.7 11.7 0 0 0 39 36.3a4 4 0 1 1 7.6 2.4v3.2Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <button class="secondary icon-button capture-circle" id="captureBtn" type="button" aria-label="Capture image" title="Capture image">
+            <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+              <path d="M20.2 18.5 24 13.2c.8-1.1 2.1-1.8 3.5-1.8h9c1.4 0 2.7.7 3.5 1.8l3.8 5.3h5.9c3.5 0 6.3 2.8 6.3 6.3v22.5c0 3.5-2.8 6.3-6.3 6.3H14.3c-3.5 0-6.3-2.8-6.3-6.3V24.8c0-3.5 2.8-6.3 6.3-6.3h5.9Z" fill="currentColor"/>
+              <circle cx="32" cy="36" r="10.2" fill="white" fill-opacity="0.82"/>
+              <circle cx="32" cy="36" r="5.8" fill="currentColor" fill-opacity="0.72"/>
+            </svg>
+          </button>
           <button class="ghost hidden" id="retakeBtn" type="button">Retake</button>
-          <button class="ghost" id="switchCameraBtn" type="button">Switch Camera</button>
         </div>
         <div class="right-actions">
           <button id="savePhotoBtn" type="button" disabled>Save to Square</button>
@@ -3548,7 +3732,7 @@
         zoneWidth: 30.93,
         zoneHeights: [17.40, 17.35, 17.35, 17.35],
         progress: {
-          count: [88.4, 93.55, 8.2],
+          count: [91.15, 93.34, 8.4],
           bar: [6.4, 94.78, 89.3, 2.05],
           button: [36, 96.9, 28, 2.1]
         }
@@ -4032,7 +4216,7 @@
       currentIndex = index;
       capturedBlob = null;
       capturedDataUrl = null;
-      mountCameraInSelectedCard(index);
+      applyCameraFrameForSquare(index);
 
       const existingPhotoUrl = progress[index]?.imageUrl || "";
       const hasExistingPhoto = Boolean(existingPhotoUrl);
@@ -4054,7 +4238,6 @@
       cameraMessage.classList.add("hidden");
       cameraTitle.textContent = `Square ${index + 1}`;
       cameraTaskText.textContent = tasks[index];
-      cameraDialog.classList.add("inline-card-camera");
       cameraDialog.showModal();
 
       if (hasExistingPhoto) {
@@ -4262,19 +4445,20 @@
       cameraVideo.srcObject = null;
     }
 
-    function mountCameraInSelectedCard(index) {
-      const host = grid.children[index];
-      if (!host) return;
-      host.appendChild(cameraVideo);
-      host.appendChild(photoPreview);
-      cameraBox.classList.add("inline-preview-mounted");
+    function applyCameraFrameForSquare(index) {
+      const cell = getDesignCell(activeDesign || selectDesignForViewport(), index);
+      const aspect = cell?.w && cell?.h ? cell.w / cell.h : 1;
+      cameraBox.style.setProperty("--camera-frame-ratio", `${cell?.w || 1} / ${cell?.h || 1}`);
+      cameraBox.style.setProperty("--camera-frame-aspect", String(aspect));
     }
 
     function restoreCameraElementsToDialog() {
-      cameraBox.insertBefore(cameraVideo, cameraBox.firstChild);
-      cameraBox.insertBefore(photoPreview, cameraMessage);
-      cameraBox.classList.remove("inline-preview-mounted");
-      cameraDialog.classList.remove("inline-card-camera");
+      if (cameraVideo.parentElement !== cameraBox) {
+        cameraBox.insertBefore(cameraVideo, cameraBox.firstChild);
+      }
+      if (photoPreview.parentElement !== cameraBox) {
+        cameraBox.insertBefore(photoPreview, cameraMessage);
+      }
     }
 
     function stopCamera() {
@@ -4298,54 +4482,56 @@
       cameraMessage.classList.remove("hidden");
     }
 
+    function getCaptureOutputSize(index) {
+      const cell = getDesignCell(activeDesign || selectDesignForViewport(), index);
+      const aspect = cell?.w && cell?.h ? cell.w / cell.h : 1;
+      const longSide = 1400;
+
+      if (aspect >= 1) {
+        return {
+          width: longSide,
+          height: Math.round(longSide / aspect)
+        };
+      }
+
+      return {
+        width: Math.round(longSide * aspect),
+        height: longSide
+      };
+    }
+
+    function drawVideoContain(ctx, video, x, y, w, h) {
+      const scale = Math.min(w / video.videoWidth, h / video.videoHeight);
+      const dw = video.videoWidth * scale;
+      const dh = video.videoHeight * scale;
+      const dx = x + (w - dw) / 2;
+      const dy = y + (h - dh) / 2;
+      ctx.drawImage(video, dx, dy, dw, dh);
+    }
+
     async function capturePhoto() {
       if (!cameraVideo.videoWidth || !cameraVideo.videoHeight) {
         showToast("Camera is still loading. Try again.");
         return;
       }
 
-      /*
-       * The camera preview is displayed as a square using object-fit: cover.
-       * This capture uses the same centered square crop, so the saved photo
-       * matches what the user sees in the camera box and bingo card.
-       */
-      const sourceSide = Math.min(cameraVideo.videoWidth, cameraVideo.videoHeight);
-      const sourceX = Math.floor((cameraVideo.videoWidth - sourceSide) / 2);
-      const sourceY = Math.floor((cameraVideo.videoHeight - sourceSide) / 2);
-      const outputSize = 1200;
+      const target = getCaptureOutputSize(currentIndex);
 
-      captureCanvas.width = outputSize;
-      captureCanvas.height = outputSize;
+      captureCanvas.width = target.width;
+      captureCanvas.height = target.height;
 
       const ctx = captureCanvas.getContext("2d");
+      ctx.fillStyle = "#020817";
+      ctx.fillRect(0, 0, captureCanvas.width, captureCanvas.height);
+
       if (streamFacingMode === "user") {
         ctx.save();
-        ctx.translate(outputSize, 0);
+        ctx.translate(captureCanvas.width, 0);
         ctx.scale(-1, 1);
-        ctx.drawImage(
-          cameraVideo,
-          sourceX,
-          sourceY,
-          sourceSide,
-          sourceSide,
-          0,
-          0,
-          outputSize,
-          outputSize
-        );
+        drawVideoContain(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
         ctx.restore();
       } else {
-        ctx.drawImage(
-          cameraVideo,
-          sourceX,
-          sourceY,
-          sourceSide,
-          sourceSide,
-          0,
-          0,
-          outputSize,
-          outputSize
-        );
+        drawVideoContain(ctx, cameraVideo, 0, 0, captureCanvas.width, captureCanvas.height);
       }
 
       capturedBlob = await canvasToBlob(captureCanvas, "image/jpeg", 0.88);
