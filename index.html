@@ -4768,40 +4768,9 @@
       saveIndividualPhotosBtn.innerHTML = `<span class="spinner"></span> Saving...`;
 
       try {
-        if (window.showDirectoryPicker) {
-          const directoryHandle = await window.showDirectoryPicker({ mode: "readwrite" });
-          const photoEntries = await fetchRawIndividualPhotoEntries(photoItems);
-
-          await Promise.all(photoEntries.map(async ({ blob, fileName }) => {
-            const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
-            const writable = await fileHandle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-          }));
-
-          showToast(`${photoEntries.length} raw photos saved to your device.`);
-          showLocalSaveConfirmation(`${photoEntries.length} raw Human Bingo photos saved locally on your device.`);
-          return;
-        }
-
         const photoEntries = await fetchRawIndividualPhotoEntries(photoItems);
-        const files = photoEntries.map(({ blob, fileName }) => new File([blob], fileName, {
-          type: blob.type || "image/jpeg"
-        }));
-
-        if (navigator.canShare?.({ files })) {
-          await navigator.share({
-            title: "Human Bingo Raw Photos",
-            text: "Raw photos from my completed Human Bingo card.",
-            files
-          });
-          showToast(`${photoEntries.length} raw photos shared.`);
-          showLocalSaveConfirmation(`${photoEntries.length} raw Human Bingo photos shared from your device.`);
-          return;
-        }
-
         photoEntries.forEach(({ blob, fileName }, index) => {
-          setTimeout(() => triggerBlobDownload(blob, fileName), index * 180);
+          setTimeout(() => triggerBlobDownload(blob, fileName), index * 220);
         });
         showToast(`${photoEntries.length} raw photo downloads started.`);
         showLocalSaveConfirmation(`${photoEntries.length} raw Human Bingo photo downloads started.`);
