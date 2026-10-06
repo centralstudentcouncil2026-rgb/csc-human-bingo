@@ -3261,14 +3261,16 @@
 
     .square:not(.completed) .square-content {
       position: absolute;
-      left: 5.5%;
-      right: 5.5%;
-      bottom: 7.5%;
+      left: 6%;
+      right: 6%;
+      top: 48%;
+      bottom: 7%;
       z-index: 2;
       display: grid !important;
       place-items: center;
-      min-height: 31%;
-      padding: 0 2%;
+      min-height: 0;
+      padding: 0 3%;
+      overflow: hidden;
       color: #151515;
       font-family: "Arial Narrow Bold", "Franklin Gothic Medium", Arial, sans-serif;
       font-weight: 800;
@@ -3283,7 +3285,8 @@
     .square:not(.completed) .square-content .task {
       display: block;
       color: #151515 !important;
-      font-size: clamp(0.34rem, 1.55vw, 0.78rem);
+      max-width: 100%;
+      font-size: clamp(0.3rem, 1.18vw, 0.66rem);
       line-height: 1.05;
       letter-spacing: 0 !important;
       text-transform: none;
@@ -3928,6 +3931,7 @@
     window.addEventListener("pagehide", stopCamera);
     window.addEventListener("resize", handleResponsiveDesignChange);
     window.addEventListener("orientationchange", handleResponsiveDesignChange);
+    designBackground.addEventListener("load", fitChallengeTextLabels);
 
     async function init() {
       applyResponsiveDesign();
@@ -4354,12 +4358,14 @@
         grid.appendChild(button);
       });
       applyZonePositions();
+      fitChallengeTextLabels();
     }
 
     function handleResponsiveDesignChange() {
       window.requestAnimationFrame(() => {
         applyResponsiveDesign();
         applyZonePositions();
+        fitChallengeTextLabels();
       });
     }
 
@@ -4403,6 +4409,35 @@
         zone.style.top = `${top}%`;
         zone.style.width = `${activeDesign.zoneWidth}%`;
         zone.style.height = `${height}%`;
+      });
+    }
+
+    function fitChallengeTextLabels() {
+      const labels = grid.querySelectorAll(".square:not(.completed) .square-content .task");
+
+      labels.forEach(label => {
+        const container = label.closest(".square-content");
+        if (!container) return;
+
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        if (!containerWidth || !containerHeight) return;
+
+        const squareWidth = container.closest(".square")?.clientWidth || containerWidth;
+        const maxSize = Math.min(24, Math.max(9, squareWidth * 0.105));
+        const minSize = Math.max(7, Math.min(10, squareWidth * 0.046));
+
+        label.style.fontSize = `${maxSize}px`;
+        label.style.lineHeight = "1.04";
+
+        let size = maxSize;
+        while (
+          size > minSize &&
+          (label.scrollHeight > containerHeight || label.scrollWidth > containerWidth)
+        ) {
+          size -= 0.5;
+          label.style.fontSize = `${size}px`;
+        }
       });
     }
 
