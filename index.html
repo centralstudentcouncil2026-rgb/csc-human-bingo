@@ -3133,7 +3133,7 @@
       inset: -20px;
       z-index: 0;
       pointer-events: none;
-      background-image: var(--bingo-design-image, url("human-bingo-skyline-1080x1920.png"));
+      background-image: var(--bingo-design-image, url("papsas-youth-human-bingo-poster.png"));
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
@@ -3205,7 +3205,7 @@
       margin: 0 auto;
       aspect-ratio: 9 / 16 !important;
       overflow: hidden;
-      background-image: var(--bingo-design-image, url("human-bingo-skyline-1080x1920.png"));
+      background-image: var(--bingo-design-image, url("papsas-youth-human-bingo-poster.png"));
       background-position: center;
       background-size: 100% 100%;
       background-repeat: no-repeat;
@@ -3257,6 +3257,39 @@
     .camera-watermark,
     .square-content {
       display: none !important;
+    }
+
+    .square:not(.completed) .square-content {
+      position: absolute;
+      left: 5.5%;
+      right: 5.5%;
+      bottom: 7.5%;
+      z-index: 2;
+      display: grid !important;
+      place-items: center;
+      min-height: 31%;
+      padding: 0 2%;
+      color: #151515;
+      font-family: "Arial Narrow Bold", "Franklin Gothic Medium", Arial, sans-serif;
+      font-weight: 800;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .square:not(.completed) .square-content .num {
+      display: none;
+    }
+
+    .square:not(.completed) .square-content .task {
+      display: block;
+      color: #151515 !important;
+      font-size: clamp(0.34rem, 1.55vw, 0.78rem);
+      line-height: 1.05;
+      letter-spacing: 0 !important;
+      text-transform: none;
+      overflow-wrap: anywhere;
+      text-wrap: balance;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34);
     }
 
     .square img,
@@ -3401,7 +3434,7 @@
       color: #ffffff;
       background:
         linear-gradient(180deg, rgba(5, 17, 40, 0.96), rgba(5, 17, 40, 0.90)),
-        var(--bingo-design-image, url("human-bingo-skyline-1080x1920.png"));
+        var(--bingo-design-image, url("papsas-youth-human-bingo-poster.png"));
       background-size: cover;
       background-position: center;
       transform: none;
@@ -3608,14 +3641,14 @@
 
     <section class="board-stage" aria-label="Bingo board section">
       <div class="notice" id="notice"></div>
-      <section class="bingo-card" aria-label="4 by 3 Bingo Card">
+      <section class="bingo-card" aria-label="3 by 3 Bingo Card">
         <div class="bingo-design">
-          <img id="designBackground" src="human-bingo-skyline-1080x1920.png" class="design-background" alt="AUP Skyline Human Bingo card" />
+          <img id="designBackground" src="papsas-youth-human-bingo-poster.png" class="design-background" alt="PAPSAS Youth Human Bingo poster" />
           <div class="grid" id="bingoGrid"></div>
           <aside class="bottom-progress" aria-label="Bingo progress">
             <div class="progress-top">
               <span>Progress</span>
-              <span id="progressText">0/12</span>
+              <span id="progressText">0/9</span>
             </div>
             <div class="progress-message" id="progressMessage">Complete all challenges!</div>
             <div class="bar" aria-hidden="true"><div id="progressBar"></div></div>
@@ -3668,7 +3701,7 @@
     <div class="modal-body congrats collage-popup-body">
       <button class="collage-popup-close" id="closeCongratsBtn" type="button" aria-label="Close completed card popup">Close</button>
       <div class="collage-popup-title">Congratulations!</div>
-      <p class="collage-popup-subtitle">Your Human Bingo Card Collage is Ready!</p>
+      <p class="collage-popup-subtitle">Your PAPSAS Youth Human Bingo card is ready!</p>
 
       <div class="collage-template-frame">
         <div class="collage-preview-card">
@@ -3758,29 +3791,29 @@
     const STORAGE_BUCKET = "bingo-photos";
     const TABLE_NAME = "bingo_progress";
     const PROGRESS_ROW_INDEX = 0;
-    const PROGRESS_ROW_TASK = "__human_bingo_progress_json__";
+    const PROGRESS_ROW_TASK = "__papsas_youth_human_bingo_progress_json__";
     const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
-    const LOCAL_PROGRESS_CACHE_PREFIX = "human-bingo-progress";
+    const LOCAL_PROGRESS_CACHE_PREFIX = "papsas-youth-human-bingo-progress";
     const CAPTURE_LONG_SIDE = 1100;
     const CAPTURE_JPEG_QUALITY = 0.82;
 
-    const GRID_COLUMNS = 4;
+    const GRID_COLUMNS = 3;
     const GRID_ROWS = 3;
     const TOTAL_SQUARES = GRID_COLUMNS * GRID_ROWS;
 
     const BINGO_DESIGNS = [
       {
-        src: "human-bingo-skyline-1080x1920.png",
-        width: 1080,
-        height: 1920,
-        columns: [3.24, 35.09, 66.85],
-        rows: [19.53, 37.50, 55.42, 73.33],
-        zoneWidth: 30.93,
-        zoneHeights: [17.40, 17.35, 17.35, 17.35],
+        src: "papsas-youth-human-bingo-poster.png",
+        width: 941,
+        height: 1672,
+        columns: [5.85, 35.81, 65.57],
+        rows: [32.95, 47.55, 62.14],
+        zoneWidth: 28.8,
+        zoneHeights: [13.52, 13.52, 13.52],
         progress: {
-          count: [87.7, 93.8, 8.8],
-          bar: [6.4, 94.78, 89.3, 2.05],
-          button: [1.7, 92.45, 96.6, 6.35]
+          count: [85.2, 90.58, 9.8],
+          bar: [11.16, 91.03, 77.6, 1.62],
+          button: [6.7, 89.35, 86.6, 5.15]
         }
       }
     ];
@@ -3788,18 +3821,15 @@
     let activeDesign = BINGO_DESIGNS[0];
 
     const DEFAULT_TASKS = [
-      "Find someone from COB who loves playing basketball",
-      "Find someone from CTE who wants to become a teacher abroad",
-      "Find someone from CSET who has built or programmed something",
-      "Find someone from COT who has preached or led a worship service",
-      "Find someone from CAH who can sing, dance, draw, or act",
-      "Find someone from COD who has never had a tooth extracted",
-      "Find someone from CON who knows how to take blood pressure",
-      "Find someone from COH who enjoys running or working out",
-      "Find someone who originates from a different country or province than you",
-      "Take a funny group photo with anyone",
-      "Do a peace sign with a faculty or staff",
-      "Take a photo with a CSC Officer"
+      "Find someone who can play a musical instrument",
+      "Find someone from a different province",
+      "Find someone who has traveled to another country",
+      "Find someone who can share their motto",
+      "Find someone who has served as a student leader for more than 5 years",
+      "Find someone who can speak three or more languages",
+      "Find someone who is single",
+      "Find someone who has a partner",
+      "Find someone who has never visited Davao City"
     ];
 
     let supabaseClient = null;
@@ -3962,9 +3992,13 @@
         .maybeSingle();
 
       if (error) throw error;
-      progress = data?.task === PROGRESS_ROW_TASK
-        ? await hydrateStoredProgress(data.image_path)
-        : await loadLegacyProgressRows();
+      if (data?.task === PROGRESS_ROW_TASK) {
+        progress = await hydrateStoredProgress(data.image_path);
+      } else if (typeof data?.image_path === "string" && data.image_path.trim().startsWith("{")) {
+        progress = {};
+      } else {
+        progress = await loadLegacyProgressRows();
+      }
 
       cacheProgressLocally(progress);
       renderGrid();
@@ -4804,7 +4838,7 @@
 
         const blob = await response.blob();
         const extension = (blob.type || "image/jpeg").includes("png") ? "png" : "jpg";
-        const fileName = `human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
+        const fileName = `papsas-youth-human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
 
         return { blob, fileName };
       }));
@@ -4854,11 +4888,11 @@
 
     async function previewWholeCollage() {
       if (!latestCollageBlob) latestCollageBlob = await generateCollageBlob();
-      const fileName = "CSCHumanBingoAkwe2026.png";
+      const fileName = "PAPSASYouthHumanBingo2026.png";
       openFullPreview(URL.createObjectURL(latestCollageBlob), latestCollageBlob, fileName, {
-        title: "Whole Collage Preview",
-        text: "My completed Human Bingo Card Collage."
-      }, "Whole Human Bingo Card Collage preview");
+        title: "PAPSAS Youth Human Bingo Preview",
+        text: "My completed PAPSAS Youth Human Bingo card."
+      }, "Whole PAPSAS Youth Human Bingo card preview");
     }
 
     async function previewPhotoByIndex(index, button) {
@@ -4877,11 +4911,11 @@
         if (!response.ok) throw new Error("Could not load this saved photo.");
         const blob = await response.blob();
         const extension = (blob.type || "image/jpeg").includes("png") ? "png" : "jpg";
-        const fileName = `human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
+        const fileName = `papsas-youth-human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
         openFullPreview(URL.createObjectURL(blob), blob, fileName, {
-          title: `Human Bingo Square ${index + 1}`,
-          text: `Photo from Human Bingo square ${index + 1}.`
-        }, `Full photo preview for square ${index + 1}`);
+          title: `PAPSAS Youth Human Bingo Square ${index + 1}`,
+          text: `Photo from PAPSAS Youth Human Bingo square ${index + 1}.`
+        }, `Full PAPSAS Youth Human Bingo photo preview for square ${index + 1}`);
       } catch (error) {
         console.error(error);
         showToast(error.message || "Could not preview this photo.");
@@ -4955,11 +4989,11 @@
         if (!response.ok) throw new Error("Could not load this saved photo.");
         const blob = await response.blob();
         const extension = (blob.type || "image/jpeg").includes("png") ? "png" : "jpg";
-        const fileName = `human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
+        const fileName = `papsas-youth-human-bingo-square-${String(index + 1).padStart(2, "0")}.${extension}`;
 
         await saveBlobToDevice(blob, fileName, {
-          title: `Human Bingo Square ${index + 1}`,
-          text: `Photo from Human Bingo square ${index + 1}.`
+          title: `PAPSAS Youth Human Bingo Square ${index + 1}`,
+          text: `Photo from PAPSAS Youth Human Bingo square ${index + 1}.`
         });
 
         showToast(`Square ${index + 1} photo saved to your device.`);
@@ -5393,14 +5427,14 @@
       saveCollageBtn.innerHTML = `<span class="spinner"></span> Saving...`;
 
       try {
-        const fileName = "CSCHumanBingoAkwe2026.png";
+        const fileName = "PAPSASYouthHumanBingo2026.png";
         await saveBlobToDevice(latestCollageBlob, fileName, {
-          title: "Human Bingo Card Collage",
-          text: "My completed Human Bingo Card Collage."
+          title: "PAPSAS Youth Human Bingo Card",
+          text: "My completed PAPSAS Youth Human Bingo card."
         });
 
         showToast("Collage saved to your device.");
-        showLocalSaveConfirmation("Bingo card saved locally as CSCHumanBingoAkwe2026.png.");
+        showLocalSaveConfirmation("Bingo card saved locally as PAPSASYouthHumanBingo2026.png.");
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error(error);
@@ -5416,7 +5450,7 @@
       const url = URL.createObjectURL(latestCollageBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "CSCHumanBingoAkwe2026.png";
+      a.download = "PAPSASYouthHumanBingo2026.png";
       document.body.appendChild(a);
       a.click();
       a.remove();
