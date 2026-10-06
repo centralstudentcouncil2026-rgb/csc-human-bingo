@@ -5504,43 +5504,7 @@
       setTimeout(() => URL.revokeObjectURL(url), 800);
     }
 
-    async function saveBlobToDevice(blob, fileName, shareMeta = {}) {
-      const mimeType = blob.type || "application/octet-stream";
-
-      if (window.showSaveFilePicker) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: fileName,
-            types: [{
-              description: mimeType.includes("png") ? "PNG image" : "Image file",
-              accept: { [mimeType]: [`.${fileName.split(".").pop() || "png"}`] }
-            }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(blob);
-          await writable.close();
-          return "saved";
-        } catch (error) {
-          if (error.name === "AbortError") throw error;
-          console.warn("File picker save failed. Trying the next save method.", error);
-        }
-      }
-
-      const file = new File([blob], fileName, { type: mimeType });
-      if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: shareMeta.title || fileName,
-            text: shareMeta.text || "Saved from Human Bingo.",
-            files: [file]
-          });
-          return "shared";
-        } catch (error) {
-          if (error.name === "AbortError") throw error;
-          console.warn("Native share failed. Starting a direct download instead.", error);
-        }
-      }
-
+    async function saveBlobToDevice(blob, fileName) {
       triggerBlobDownload(blob, fileName);
       return "downloaded";
     }
