@@ -3807,6 +3807,7 @@
     const BINGO_DESIGNS = [
       {
         src: "papsas-youth-human-bingo-poster.png",
+        completedSrc: "papsas-youth-human-bingo-completed.png",
         width: 941,
         height: 1672,
         columns: [5.85, 35.81, 65.57],
@@ -5310,7 +5311,7 @@
       canvas.height = design.height;
 
       try {
-        const template = await loadImage(design.src);
+        const template = await loadImage(design.completedSrc || design.src);
         ctx.drawImage(template, 0, 0, canvas.width, canvas.height);
       } catch (error) {
         console.warn("Could not load bingo template. Falling back to a plain white poster.", error);
@@ -5322,7 +5323,7 @@
         await drawTemplateCollageCell(ctx, i, design);
       }
 
-      drawCollageProgressCount(ctx, design);
+      if (!design.completedSrc) drawCollageProgressCount(ctx, design);
 
       return await canvasToBlob(canvas, "image/png", 1);
     }
