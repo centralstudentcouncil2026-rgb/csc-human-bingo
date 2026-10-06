@@ -3955,8 +3955,15 @@
 
         await ensureAnonymousUser();
         loadProgressFromLocalCache();
-        await loadProgressFromSupabase();
-        hideNotice();
+        let progressLoaded = true;
+        try {
+          await loadProgressFromSupabase();
+        } catch (progressError) {
+          progressLoaded = false;
+          console.error(progressError);
+          showNotice("Could not load saved progress yet. You can still play; new photos will sync when Supabase is available.");
+        }
+        if (progressLoaded) hideNotice();
       } catch (error) {
         console.error(error);
         showNotice("Could not connect to Supabase. Check your URL, anon key, Anonymous Sign-ins setting, table, bucket, and RLS policies.");
@@ -3993,12 +4000,17 @@
         .select("task, image_path, updated_at")
         .eq("user_id", visitorId)
         .eq("square_index", PROGRESS_ROW_INDEX)
-        .maybeSingle();
+        .order("updated_at", { ascending: false })
+        .limit(12);
 
       if (error) throw error;
-      if (data?.task === PROGRESS_ROW_TASK) {
-        progress = await hydrateStoredProgress(data.image_path);
-      } else if (typeof data?.image_path === "string" && data.image_path.trim().startsWith("{")) {
+      const rows = Array.isArray(data) ? data : [];
+      const currentRow = rows.find(row => row.task === PROGRESS_ROW_TASK);
+      const firstRow = currentRow || rows[0] || null;
+
+      if (currentRow) {
+        progress = await hydrateStoredProgress(currentRow.image_path);
+      } else if (typeof firstRow?.image_path === "string" && firstRow.image_path.trim().startsWith("{")) {
         progress = {};
       } else {
         progress = await loadLegacyProgressRows();
@@ -4245,7 +4257,7 @@
         updated_at: new Date().toISOString()
       };
 
-      const { data: updatedRow, error: updateError } = await supabaseClient
+      const { data: updatedRows, error: updateError } = await supabaseClient
         .from(TABLE_NAME)
         .update({
           task: payload.task,
@@ -4255,11 +4267,11 @@
         .eq("user_id", visitorId)
         .eq("square_index", PROGRESS_ROW_INDEX)
         .select("user_id")
-        .maybeSingle();
+        .limit(1);
 
       if (updateError) throw updateError;
 
-      if (!updatedRow) {
+      if (!updatedRows?.length) {
         const { error: insertError } = await supabaseClient
           .from(TABLE_NAME)
           .insert(payload);
