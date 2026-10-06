@@ -3315,29 +3315,21 @@
       background: transparent !important;
     }
 
-    .square.completed {
-      overflow: visible;
-    }
-
     .square.completed::before,
     .square.completed::after {
       display: none;
     }
 
     .live-social-tag {
-      display: none;
-    }
-
-    .square.completed .live-social-tag {
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(100% + 2px);
-      z-index: 5;
+      top: 77.6%;
+      z-index: 4;
       display: block;
       color: #151515;
       font-family: "Arial Narrow Bold", "Franklin Gothic Medium", Arial, sans-serif;
-      font-size: clamp(0.32rem, 1.3vw, 0.68rem);
+      font-size: clamp(0.76rem, 3.2vw, 1.48rem);
       font-weight: 800;
       line-height: 1;
       text-align: center;
@@ -3674,6 +3666,7 @@
         <div class="bingo-design">
           <img id="designBackground" src="papsas-youth-human-bingo-poster.png" class="design-background" alt="PAPSAS Youth Human Bingo poster" />
           <div class="grid" id="bingoGrid"></div>
+          <div class="live-social-tag" aria-hidden="true">@aup_csc</div>
           <aside class="bottom-progress" aria-label="Bingo progress">
             <div class="progress-top">
               <span>Progress</span>
@@ -4385,11 +4378,6 @@
           completedLabel.className = "completed-challenge-label";
           completedLabel.textContent = task;
           button.appendChild(completedLabel);
-
-          const socialTag = document.createElement("span");
-          socialTag.className = "live-social-tag";
-          socialTag.textContent = "@aup_csc";
-          button.appendChild(socialTag);
         }
 
         const content = document.createElement("div");
