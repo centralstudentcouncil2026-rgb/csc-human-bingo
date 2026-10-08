@@ -3263,8 +3263,8 @@
       position: absolute;
       left: 6%;
       right: 6%;
-      top: 48%;
-      bottom: 7%;
+      top: 45%;
+      bottom: 8%;
       z-index: 2;
       display: grid !important;
       place-items: center;
@@ -3273,7 +3273,7 @@
       overflow: hidden;
       color: #151515;
       font-family: "Arial Narrow Bold", "Franklin Gothic Medium", Arial, sans-serif;
-      font-weight: 800;
+      font-weight: 700;
       text-align: center;
       pointer-events: none;
     }
@@ -3286,8 +3286,8 @@
       display: block;
       color: #151515 !important;
       max-width: 100%;
-      font-size: clamp(0.3rem, 1.18vw, 0.66rem);
-      line-height: 1.05;
+      font-size: clamp(0.28rem, 0.95vw, 0.56rem);
+      line-height: 1.08;
       letter-spacing: 0 !important;
       text-transform: none;
       overflow-wrap: anywhere;
@@ -4456,11 +4456,11 @@
         if (!containerWidth || !containerHeight) return;
 
         const squareWidth = container.closest(".square")?.clientWidth || containerWidth;
-        const maxSize = Math.min(24, Math.max(9, squareWidth * 0.105));
-        const minSize = Math.max(7, Math.min(10, squareWidth * 0.046));
+        const maxSize = Math.min(18, Math.max(7.5, squareWidth * 0.078));
+        const minSize = Math.max(6.5, Math.min(8.5, squareWidth * 0.038));
 
         label.style.fontSize = `${maxSize}px`;
-        label.style.lineHeight = "1.04";
+        label.style.lineHeight = "1.08";
 
         let size = maxSize;
         while (
